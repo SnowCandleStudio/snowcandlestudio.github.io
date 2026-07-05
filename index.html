@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+  スマホでFX検証 — ランディングページ（β募集）
+  ─────────────────────────────────────────────
+  出典：コピー = docs/lp/lp_copy_ja.md／構成・視覚デザイン = docs/lp/claude_design_source.dc.html
+        （Claude Designで作成した版をプレーンHTML/CSS/JSへ移植。GitHub Pagesでの静的公開に対応）
+        デザイントークン = docs/design/design.md（Hex厳守）
+  公開：GitHub Pages（SnowCandleStudio/snowcandlestudio.github.io リポジトリ直下へ
+        index.html と img/ をそのままアップロード）
+
+  ★差し替え必須（β応募フォーム）：下部 <script> 冒頭の
+    SIGNUP_ACTION_URL … Googleフォームの投稿先（.../formResponse。閲覧用viewformではない）
+    SIGNUP_EMAIL_FIELD … そのフォームのメール質問に対応する entry.XXXXXXXXX
+  ⚠️ fetchはmode:'no-cors'のため送信成功/失敗をJSから検知できません。
+     本番公開前に必ず自分のメールアドレスで実送信し、Googleフォームの回答シートに
+     実際に届くか目視確認すること（未設定の間は「準備中」表示になりリンク切れは起きない）。
+
+  不変制約：投資助言NG（勝てる/稼げる/儲かる/将来予測なし）・アクセントは cyan 1色のみ・
+  競合名（TradingView等）は名指ししない（docs/requirements/optimization_worksheet_lp.md §2）。
+-->
+<title>スマホでFX検証 | 過去チャートで裁量検証・記録できるAndroidアプリ（クローズドβ募集）</title>
+<meta name="description" content="スマホで過去チャートを1本ずつ検証。エントリー理由・損切り理由・リスクリワードまで記録できるFX検証アプリ。Android向けクローズドβテスターを募集しています。">
+<meta name="theme-color" content="#0E1116">
+<link rel="icon" type="image/png" href="img/icon512.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="スマホでFX検証 | 過去チャートで裁量検証・記録できるAndroidアプリ">
+<meta property="og:description" content="スマホで過去チャートを1本ずつ検証。エントリー理由・損切り理由・リスクリワードまで記録できるFX検証アプリ。クローズドβ募集中。">
+<meta property="og:url" content="https://snowcandlestudio.github.io/">
+<meta property="og:image" content="https://snowcandlestudio.github.io/img/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+
+  :root{
+    --primary:#4FC3F7; --primary-hover:#6ED0F9; --primary-active:#3AAEE0; --on-primary:#0B0E12;
+    --canvas:#0E1116; --canvas-soft:#14181F; --surface:#1C2128; --surface-raised:#222831;
+    --ink:#E6EAF0; --ink-2:#9AA3B0; --ink-muted:#6E7681; --ink-faint:#555B66;
+    --hairline:#1B2230; --border:#555B66;
+    --long:#26A69A; --short:#EF5350; --pending:#FFB74D;
+    --font:"Inter","Noto Sans JP",-apple-system,"Hiragino Sans",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+  body{background:var(--canvas);color:var(--ink-2);font-family:var(--font);font-size:15.5px;line-height:1.75;-webkit-font-smoothing:antialiased;overflow-x:clip;}
+  img{max-width:100%;height:auto;display:block;}
+  a{color:var(--primary);text-decoration:none;}
+  ::selection{background:rgba(79,195,247,.28);color:var(--ink);}
+  a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--primary);outline-offset:3px;border-radius:4px;}
+  summary::-webkit-details-marker{display:none;}
+  input::placeholder{color:var(--ink-faint);}
+
+  .container{max-width:1120px;margin:0 auto;padding:0 24px;}
+  section{scroll-margin-top:76px;}
+  .eyebrow{display:block;font-weight:700;font-size:12px;letter-spacing:.22em;color:var(--primary);text-transform:uppercase;}
+  h2{margin:14px 0 0;font-weight:700;font-size:clamp(25px,3.5vw,38px);line-height:1.4;letter-spacing:-.02em;color:var(--ink);}
+  .section-head{text-align:center;max-width:760px;margin:0 auto;}
+  .section-lead{margin:16px 0 0;font-size:15px;line-height:1.85;color:var(--ink-2);}
+
+  /* ===== ボタン ===== */
+  .btn-primary{display:inline-block;background:var(--primary);color:var(--on-primary);font-weight:700;font-size:15.5px;padding:15px 32px;border:none;border-radius:8px;cursor:pointer;text-decoration:none;transition:background .2s,transform .2s,box-shadow .2s;font-family:var(--font);}
+  .btn-primary:hover{background:var(--primary-hover);transform:translateY(-1px);box-shadow:0 10px 28px rgba(79,195,247,.28);text-decoration:none;}
+  .btn-primary:active{background:var(--primary-active);transform:translateY(0);}
+  .btn-secondary{display:inline-block;border:1px solid var(--border);color:var(--ink);font-weight:600;font-size:15px;padding:14px 26px;border-radius:8px;text-decoration:none;transition:border-color .2s,background .2s,color .2s;}
+  .btn-secondary:hover{border-color:var(--primary);background:rgba(79,195,247,.06);color:var(--primary);text-decoration:none;}
+  .btn-secondary:active{background:rgba(79,195,247,.1);}
+  .btn-disabled{display:inline-block;width:100%;background:var(--surface);color:var(--ink-muted);font-weight:700;font-size:15.5px;padding:15px 20px;border:1px solid var(--border);border-radius:8px;text-align:center;cursor:default;font-family:var(--font);}
+
+  /* ===== ナビ ===== */
+  .nav{position:sticky;top:0;z-index:90;background:rgba(14,17,22,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(27,34,48,.45);transition:background .3s ease,border-color .3s ease,box-shadow .3s ease;}
+  .nav.is-scrolled{background:rgba(14,17,22,.88);border-bottom-color:var(--hairline);box-shadow:0 10px 34px rgba(0,0,0,.38);}
+  .nav-inner{max-width:1160px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex:none;}
+  .nav-brand span{font-weight:700;font-size:15.5px;letter-spacing:.01em;color:var(--ink);white-space:nowrap;}
+  .nav-right{display:flex;align-items:center;gap:8px 22px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end;}
+  .nav-links{display:flex;align-items:center;gap:4px 20px;flex-wrap:wrap;justify-content:flex-end;}
+  .nav-links a{color:var(--ink-2);font-size:13.5px;font-weight:500;padding:6px 2px;white-space:nowrap;transition:color .2s;}
+  .nav-links a:hover{color:var(--ink);text-decoration:none;}
+  .nav .btn-primary{padding:10px 18px;font-size:13.5px;}
+  @media(max-width:700px){.nav-links a{display:none;}}
+
+  /* ===== Hero ===== */
+  .hero{position:relative;overflow:hidden;background:radial-gradient(1000px 500px at 76% -12%,rgba(79,195,247,.10),transparent 62%),radial-gradient(700px 420px at 6% 112%,rgba(79,195,247,.05),transparent 60%),var(--canvas);border-bottom:1px solid var(--hairline);}
+  .hero-grid-bg{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(27,34,48,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(27,34,48,.6) 1px,transparent 1px);background-size:44px 44px;opacity:.5;-webkit-mask-image:radial-gradient(820px 560px at 72% 8%,rgba(0,0,0,.6),transparent 72%);mask-image:radial-gradient(820px 560px at 72% 8%,rgba(0,0,0,.6),transparent 72%);}
+  .hero-inner{position:relative;max-width:1120px;margin:0 auto;padding:clamp(52px,7vw,88px) 24px clamp(64px,8vw,100px);display:flex;flex-wrap:wrap;align-items:center;gap:clamp(40px,6vw,72px);}
+  .hero-copy{flex:1 1 500px;min-width:0;}
+  .badge-beta{display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(79,195,247,.45);background:rgba(79,195,247,.08);color:var(--primary);font-weight:700;font-size:12.5px;letter-spacing:.04em;padding:7px 13px;border-radius:8px;}
+  .badge-beta::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--primary);display:inline-block;}
+  .hero h1{margin:22px 0 0;font-weight:700;font-size:clamp(30px,4.7vw,52px);line-height:1.26;letter-spacing:-.03em;color:var(--ink);}
+  .hero h1 .accent{color:var(--primary);}
+  .hero .subline{margin:20px 0 0;font-weight:700;font-size:clamp(16.5px,2.1vw,20px);line-height:1.6;letter-spacing:-.01em;color:var(--ink);}
+  .hero .subcopy{margin:14px 0 0;font-size:15.5px;line-height:1.75;color:var(--ink-2);max-width:52ch;}
+  .hero-cta{margin-top:32px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;}
+  .hero-badges{margin-top:22px;display:flex;flex-wrap:wrap;gap:8px 20px;}
+  .hero-badges span{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-muted);}
+  .hero-badges svg{flex:none;}
+
+  .hero-visual{flex:1 1 360px;min-width:min(100%,320px);display:flex;justify-content:center;}
+  .phone-frame{position:relative;width:clamp(264px,30vw,330px);}
+  .phone-frame > .phone-shell{border-radius:40px;padding:11px;background:linear-gradient(180deg,#222831,#161C24);border:1px solid rgba(85,91,102,.5);box-shadow:0 34px 90px rgba(0,0,0,.55),0 0 120px rgba(79,195,247,.07);}
+  .phone-frame img{border-radius:29px;border:1px solid var(--hairline);background:var(--canvas);width:100%;height:auto;}
+  .float-badge{position:absolute;background:rgba(28,33,40,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(85,91,102,.45);border-radius:10px;padding:10px 13px;box-shadow:0 14px 36px rgba(0,0,0,.45);}
+  .float-badge .t{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;}
+  .float-badge .s{display:block;margin-top:3px;font-size:11px;color:var(--ink-muted);white-space:nowrap;}
+  .fb-lock{top:7%;left:clamp(-86px,-7vw,-18px);}
+  .fb-pattern{top:37%;right:clamp(-74px,-6vw,-14px);text-align:left;}
+  .fb-pattern .t{font-weight:700;font-size:13.5px;color:var(--ink);}
+  .fb-record{bottom:6%;left:clamp(-72px,-6vw,-14px);}
+  .fb-record .t{font-weight:700;font-size:13px;color:var(--ink);letter-spacing:-.01em;}
+  .fb-record .s{color:var(--ink-faint);font-size:10.5px;}
+  @media(max-width:900px){.float-badge{display:none;}}
+
+  /* ===== 課題への共感 ===== */
+  .problems{background:var(--canvas-soft);border-bottom:1px solid var(--hairline);}
+  .problems .container{padding:clamp(58px,7.5vw,92px) 24px;}
+  .problems .section-lead{text-align:center;margin-left:auto;margin-right:auto;max-width:560px;}
+  .card-grid-3{margin-top:clamp(26px,4vw,38px);display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;}
+  .icon-card{background:var(--surface);border:1px solid var(--hairline);border-radius:12px;padding:28px 26px;transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;}
+  .icon-card:hover{transform:translateY(-3px);border-color:rgba(85,91,102,.6);box-shadow:0 14px 40px rgba(0,0,0,.35);}
+  .icon-card p.h{margin:16px 0 0;font-weight:600;font-size:16px;line-height:1.7;color:var(--ink);}
+  .icon-card p.s{margin:8px 0 0;font-size:13.5px;line-height:1.75;color:var(--ink-muted);}
+  .problems-close{margin:clamp(24px,3.5vw,32px) auto 0;text-align:center;font-size:15.5px;line-height:1.75;color:var(--ink-2);max-width:600px;}
+  .problems-close b{color:var(--ink);font-weight:600;}
+
+  /* ===== 解決（3つ・01/02/03） ===== */
+  .features .container{padding:clamp(76px,9vw,116px) 24px;}
+  .feature-row{margin-top:clamp(52px,7vw,84px);display:flex;flex-wrap:wrap;align-items:center;gap:clamp(36px,5vw,72px);}
+  .feature-row.reverse{flex-wrap:wrap-reverse;flex-direction:row-reverse;}
+  .feature-text{flex:1 1 460px;min-width:0;}
+  .feature-kicker{display:flex;align-items:center;gap:14px;}
+  .feature-kicker .n{font-weight:800;font-size:13px;letter-spacing:.24em;color:var(--primary);}
+  .feature-kicker .line{width:44px;height:1px;background:var(--border);display:inline-block;}
+  .feature-pretext{margin:14px 0 0;font-weight:700;font-size:13.5px;letter-spacing:-.01em;color:var(--primary);}
+  .feature-text h3{margin:16px 0 0;font-weight:700;font-size:clamp(21px,2.6vw,29px);line-height:1.45;letter-spacing:-.02em;color:var(--ink);}
+  .feature-text h3.tight{margin-top:10px;}
+  .feature-text h3 .sub{color:var(--ink-muted);font-weight:600;font-size:.72em;}
+  .feature-text > p.body{margin:16px 0 0;font-size:15.5px;line-height:1.85;color:var(--ink-2);}
+  .feature-list{margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;}
+  .feature-list li{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.7;color:var(--ink-2);}
+  .feature-list svg{flex:none;margin-top:4px;}
+  .feature-visual{flex:1 1 340px;display:flex;flex-direction:column;align-items:center;min-width:min(100%,300px);}
+  .feature-visual .shell{width:min(292px,76vw);border-radius:38px;padding:10px;background:linear-gradient(180deg,#222831,#161C24);border:1px solid rgba(85,91,102,.5);box-shadow:0 26px 70px rgba(0,0,0,.5);}
+  .feature-visual img{border-radius:28px;border:1px solid var(--hairline);background:var(--canvas);}
+  .feature-visual figcaption{margin:14px 0 0;font-size:12.5px;color:var(--ink-faint);text-align:center;}
+
+  /* ===== 実際の画面（フィルムストリップ） ===== */
+  .screens{background:var(--canvas-soft);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);}
+  .screens .container{padding:clamp(72px,9vw,108px) 0;}
+  .screens .section-head{padding:0 24px;}
+  .filmstrip-wrap{position:relative;margin-top:clamp(34px,4vw,46px);}
+  .filmstrip{overflow-x:auto;display:flex;gap:22px;padding:10px 24px 22px;scroll-snap-type:x proximity;scroll-padding:24px;}
+  .filmstrip figure{flex:none;width:216px;margin:0;scroll-snap-align:start;}
+  .filmstrip .shell{border-radius:30px;padding:8px;background:linear-gradient(180deg,#222831,#161C24);border:1px solid rgba(85,91,102,.5);box-shadow:0 18px 50px rgba(0,0,0,.45);}
+  .filmstrip img{border-radius:22px;border:1px solid var(--hairline);background:var(--canvas);}
+  .filmstrip figcaption{margin-top:12px;padding:0 4px;}
+  .filmstrip .num{display:inline-flex;padding:2px 7px;border:1px solid rgba(79,195,247,.45);border-radius:6px;color:var(--primary);font-weight:700;font-size:11px;letter-spacing:.08em;}
+  .filmstrip .t{display:block;margin-top:6px;font-weight:600;font-size:13.5px;color:var(--ink);}
+  .filmstrip .s{display:block;margin-top:2px;font-size:12px;line-height:1.6;color:var(--ink-muted);}
+  .filmstrip-fade{position:absolute;top:0;bottom:22px;width:36px;pointer-events:none;}
+  .filmstrip-fade.left{left:0;background:linear-gradient(90deg,var(--canvas-soft),rgba(20,24,31,0));}
+  .filmstrip-fade.right{right:0;background:linear-gradient(270deg,var(--canvas-soft),rgba(20,24,31,0));}
+  .filmstrip-hint{margin:6px 0 0;text-align:center;font-size:12px;color:var(--ink-faint);}
+
+  /* ===== 利用シーン ===== */
+  .scenes .container{padding:clamp(72px,9vw,108px) 24px;}
+  .card-grid-4{margin-top:clamp(36px,5vw,52px);display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;}
+  .scene-card{background:var(--surface);border:1px solid var(--hairline);border-radius:12px;padding:26px 24px;transition:transform .25s ease,border-color .25s ease;}
+  .scene-card:hover{transform:translateY(-3px);border-color:rgba(85,91,102,.6);}
+  .scene-card p.h{margin:16px 0 0;font-weight:600;font-size:15px;line-height:1.7;color:var(--ink);}
+  .scene-card p.s{margin:6px 0 0;font-size:12.5px;line-height:1.7;color:var(--ink-muted);}
+
+  /* ===== 開発者より ===== */
+  .developer{background:var(--canvas-soft);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);}
+  .developer .container{max-width:820px;padding:clamp(72px,9vw,108px) 24px;}
+  .dev-card{margin:clamp(32px,4vw,44px) 0 0;background:var(--surface);border:1px solid var(--hairline);border-radius:12px;padding:clamp(28px,4.5vw,44px);}
+  .dev-card p{font-size:15.5px;line-height:1.95;color:var(--ink-2);}
+  .dev-card p + p{margin-top:16px;}
+  .dev-card b{color:var(--ink);font-weight:600;}
+  .dev-sig{margin-top:24px;display:flex;align-items:center;gap:14px;}
+  .dev-sig .name{font-weight:700;font-size:13px;letter-spacing:.14em;color:var(--ink);display:block;}
+  .dev-sig .role{font-size:12px;color:var(--ink-muted);display:block;margin-top:2px;}
+
+  /* ===== β参加 ===== */
+  .signup{background:radial-gradient(760px 380px at 50% 0%,rgba(79,195,247,.07),transparent 65%),var(--canvas);}
+  .signup .container{padding:clamp(76px,9vw,116px) 24px;}
+  .signup .section-lead{max-width:56ch;margin-left:auto;margin-right:auto;text-align:center;}
+  .free-badges{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:16px;}
+  .free-badges span{display:inline-flex;align-items:baseline;gap:5px;background:var(--surface);border:1px solid var(--hairline);border-radius:8px;padding:7px 12px;font-size:12.5px;color:var(--ink-2);}
+  .free-badges b{font-weight:700;color:var(--ink);}
+  .signup-grid{margin-top:clamp(40px,5vw,56px);display:flex;flex-wrap:wrap;gap:clamp(36px,5vw,64px);align-items:flex-start;justify-content:center;}
+  .steps{flex:1 1 440px;min-width:min(100%,300px);max-width:560px;list-style:none;margin:0;padding:0;display:flex;flex-direction:column;}
+  .steps li{display:flex;gap:18px;}
+  .step-num-wrap{display:flex;flex-direction:column;align-items:center;flex:none;}
+  .step-num{width:36px;height:36px;border:1.5px solid var(--primary);border-radius:50%;display:grid;place-items:center;color:var(--primary);font-weight:700;font-size:15px;}
+  .step-rule{flex:1;width:1px;background:var(--hairline);min-height:26px;}
+  .step-body{padding-bottom:26px;min-width:0;}
+  .steps li:last-of-type .step-body{padding-bottom:0;}
+  .step-body .t{display:block;font-weight:600;font-size:16px;color:var(--ink);line-height:1.6;}
+  .step-body .s{display:block;margin-top:4px;font-size:14px;line-height:1.75;color:var(--ink-2);}
+  .step-note{margin-top:26px;display:flex;gap:10px;border:1px dashed var(--border);border-radius:12px;padding:16px 18px;}
+  .step-note svg{flex:none;margin-top:4px;}
+  .step-note span{font-size:12.5px;line-height:1.8;color:var(--ink-muted);}
+
+  .signup-card{flex:1 1 380px;min-width:min(100%,300px);max-width:460px;background:var(--surface-raised);border:1px solid rgba(85,91,102,.4);border-radius:12px;padding:clamp(26px,3.5vw,34px);box-shadow:0 26px 70px rgba(0,0,0,.45);}
+  .signup-card h3{margin:0;font-weight:700;font-size:18px;letter-spacing:-.01em;color:var(--ink);}
+  .signup-card > p{margin:8px 0 0;font-size:13px;line-height:1.75;color:var(--ink-muted);}
+  .signup-form{margin-top:20px;}
+  .signup-form label{display:block;font-weight:600;font-size:13px;color:var(--ink-2);}
+  .signup-form input{margin-top:8px;width:100%;background:var(--canvas-soft);border:1px solid var(--border);border-radius:8px;color:var(--ink);font-size:15px;font-family:var(--font);padding:13px 14px;transition:border-color .2s,box-shadow .2s;}
+  .signup-form input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,195,247,.15);}
+  .signup-form button{margin-top:14px;width:100%;}
+  .signup-sent{margin-top:20px;border:1px solid rgba(79,195,247,.5);background:rgba(79,195,247,.07);border-radius:8px;padding:18px;}
+  .signup-sent p:first-child{font-weight:600;font-size:14.5px;color:var(--ink);}
+  .signup-sent p+p{margin-top:6px;font-size:13px;line-height:1.75;color:var(--ink-2);}
+  .signup-fineprint{margin:16px 0 0;font-size:12px;line-height:1.8;color:var(--ink-muted);}
+  .signup-fineprint a{color:var(--ink-2);text-decoration:underline;text-underline-offset:3px;}
+  .signup-fineprint a:hover{color:var(--primary);}
+  [hidden]{display:none !important;}
+
+  /* ===== FAQ ===== */
+  .faq-section{background:var(--canvas-soft);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);}
+  .faq-section .container{max-width:820px;padding:clamp(72px,9vw,108px) 24px;}
+  .faq-list{margin-top:clamp(30px,4vw,40px);border-top:1px solid var(--hairline);}
+  .faq-list details{border-bottom:1px solid var(--hairline);}
+  .faq-list summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:14px;padding:20px 6px;}
+  .faq-list summary .q{flex:none;font-weight:800;font-size:12px;letter-spacing:.1em;color:var(--primary);}
+  .faq-list summary .t{flex:1;font-weight:600;font-size:15.5px;line-height:1.6;color:var(--ink);}
+  .faq-list summary .plus{flex:none;color:var(--primary);font-weight:600;font-size:18px;line-height:1;transition:transform .25s ease;}
+  .faq-list details[open] summary .plus{transform:rotate(45deg);}
+  .faq-list .a{margin:0;padding:0 6px 22px 32px;font-size:14.5px;line-height:1.8;color:var(--ink-2);}
+
+  /* ===== 最終CTA ===== */
+  .cta-final{background:radial-gradient(880px 420px at 50% 100%,rgba(79,195,247,.09),transparent 62%),var(--canvas);}
+  .cta-final .container{max-width:820px;padding:clamp(88px,11vw,132px) 24px;text-align:center;}
+  .cta-final h2{font-size:clamp(27px,4.2vw,46px);line-height:1.42;letter-spacing:-.025em;}
+  .cta-final .section-lead{margin-left:auto;margin-right:auto;max-width:46ch;}
+  .cta-final .btn-primary{margin-top:30px;font-size:16px;padding:17px 44px;}
+  .cta-final .note{margin:16px 0 0;font-size:13px;color:var(--ink-muted);}
+
+  /* ===== フッター ===== */
+  footer{background:var(--canvas);border-top:1px solid var(--hairline);}
+  footer .container{padding:clamp(48px,6vw,64px) 24px 40px;}
+  .footer-top{display:flex;flex-wrap:wrap;gap:36px 56px;justify-content:space-between;align-items:flex-start;}
+  .footer-brand{flex:1 1 260px;max-width:340px;}
+  .footer-brand .row{display:flex;align-items:center;gap:10px;}
+  .footer-brand span.name{font-weight:700;font-size:15px;color:var(--ink);}
+  .footer-brand p{margin:12px 0 0;font-size:12.5px;line-height:1.8;color:var(--ink-muted);}
+  .footer-nav{flex:0 1 auto;display:flex;flex-direction:column;gap:10px;}
+  .footer-nav .label{font-weight:700;font-size:11.5px;letter-spacing:.16em;color:var(--ink-faint);text-transform:uppercase;}
+  .footer-nav a{color:var(--ink-2);font-size:13.5px;transition:color .2s;}
+  .footer-nav a:hover{color:var(--ink);text-decoration:none;}
+  .footer-nav.legal a:hover{color:var(--primary);}
+  .footer-legal{margin-top:40px;border-top:1px solid var(--hairline);padding-top:24px;}
+  .footer-legal p{margin:0;font-size:12px;line-height:1.9;color:var(--ink-muted);}
+  .footer-legal p+p{margin-top:10px;}
+  .footer-legal .copyright{margin-top:18px;font-size:12px;color:var(--ink-faint);}
+
+  /* ===== スクロールリビール ===== */
+  [data-reveal]{opacity:1;transform:none;}
+  [data-reveal].is-armed{opacity:0;transform:translateY(16px);transition:opacity .65s cubic-bezier(.2,.6,.2,1),transform .65s cubic-bezier(.2,.6,.2,1);}
+  [data-reveal].is-armed.is-visible{opacity:1;transform:none;}
+  @media(prefers-reduced-motion:reduce){[data-reveal].is-armed{opacity:1;transform:none;transition:none;}}
+
+  @media(max-width:600px){.container{padding:0 20px;}}
+</style>
+</head>
+<body>
+
+<!-- ===== ナビ ===== -->
+<nav class="nav" id="siteNav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="#top">
+      <img src="img/icon512.png" alt="" width="30" height="30" style="border-radius:7px;">
+      <span>スマホでFX検証</span>
+    </a>
+    <div class="nav-right">
+      <div class="nav-links">
+        <a href="#features">特長</a>
+        <a href="#screens">画面</a>
+        <a href="#signup">参加方法</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <a class="btn-primary" href="#signup">無料でβテストに参加する</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== Hero ===== -->
+<header class="hero" id="top">
+  <div class="hero-grid-bg" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <span class="badge-beta"><span></span>クローズドβテスト 参加者募集中</span>
+      <h1>あなたの手法は、<br><span class="accent">本当に通用するか。</span></h1>
+      <p class="subline">スマホで過去チャートを1本ずつ進めながら、エントリー理由・損切り理由・リスクリワードまで記録できるFX検証アプリ。</p>
+      <p class="subcopy">先の値動きを見ずに、スキマ時間で自分の判断を検証できます。</p>
+      <div class="hero-cta">
+        <a class="btn-primary" href="#signup">無料でβテストに参加する</a>
+        <a class="btn-secondary" href="#features">機能を見る</a>
+      </div>
+      <div class="hero-badges">
+        <span><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>対応OS：Android</span>
+        <span><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>登録はメールアドレスのみ</span>
+        <span><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>検証・記録はオフラインで利用できます</span>
+        <span><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>無料プランあり（セッション2件・トレード30件・バックアップ3件まで）</span>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="phone-frame">
+        <div class="phone-shell">
+          <img src="img/01_chart_tpsl.png" alt="アプリのチャート検証画面。上位足H1と下位足M5を同時表示し、TP/SLライン・含み損益pips・1本ずつの再生バーを表示" width="1080" height="2172">
+        </div>
+        <div class="float-badge fb-lock" aria-hidden="true">
+          <span class="t"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#4FC3F7" stroke-width="1.6"></rect><path d="M5.5 7V5.5a2.5 2.5 0 015 0V7" stroke="#4FC3F7" stroke-width="1.6"></path></svg>先読みロック</span>
+          <span class="s">再生位置より先は表示しません</span>
+        </div>
+        <div class="float-badge fb-pattern" aria-hidden="true">
+          <span class="t">パターン別に集計</span>
+          <span class="s">勝率・PF・リスクリワードなど</span>
+        </div>
+        <div class="float-badge fb-record" aria-hidden="true">
+          <span class="t">感覚ではなく、記録で振り返る</span>
+          <span class="s">数値はサンプルデータの表示例です</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== 課題への共感 ===== -->
+<section class="problems" id="problems">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Problem</span>
+      <h2>FX検証は、必要だと分かっていても続かない。</h2>
+      <p class="section-lead">PCを開き、チャートを準備し、記録を残す。<br>その一連の流れが重いと、検証はどうしても後回しになります。</p>
+    </div>
+    <div class="card-grid-3">
+      <div class="icon-card" data-reveal>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="#6E7681" stroke-width="1.7"></circle><path d="M12 7.5V12l3 2" stroke="#6E7681" stroke-width="1.7" stroke-linecap="round"></path></svg>
+        <p class="h">検証を始めても、続かない</p>
+        <p class="s">最初の数日だけ頑張って、いつの間にかやめている。</p>
+      </div>
+      <div class="icon-card" data-reveal data-reveal-delay="80">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 6.5h10M4 12h16M4 17.5h13" stroke="#6E7681" stroke-width="1.7" stroke-linecap="round" stroke-dasharray="2.5 3"></path></svg>
+        <p class="h">記録がノートやスクショに散らかる</p>
+        <p class="s">あとで見返せず、同じ失敗を繰り返してしまう。</p>
+      </div>
+      <div class="icon-card" data-reveal data-reveal-delay="160">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="12" rx="1.5" stroke="#6E7681" stroke-width="1.7"></rect><path d="M8 20h8" stroke="#6E7681" stroke-width="1.7" stroke-linecap="round"></path></svg>
+        <p class="h">PCを開くのが面倒で、結局やらない</p>
+        <p class="s">机に向かう時間を、毎日は確保できない。</p>
+      </div>
+    </div>
+    <p class="problems-close" data-reveal>検証が続かない理由は、やる気だけではありません。<br><b>判断・記録・振り返りを続けやすい形</b>になっていなかっただけです。</p>
+  </div>
+</section>
+
+<!-- ===== 解決（3つ） ===== -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Features</span>
+      <h2>検証を続けるための、3つの設計。</h2>
+    </div>
+
+    <!-- 01 -->
+    <div class="feature-row" data-reveal>
+      <div class="feature-text">
+        <div class="feature-kicker"><span class="n">01</span><span class="line"></span></div>
+        <h3>先読みロック<span class="sub">　—　先の値動きを隠して、1本ずつ検証</span></h3>
+        <p class="body">再生位置より先のローソク足やテクニカル指標の値は表示しません。未来の値動きを見ずに、エントリー判断を練習できます。</p>
+        <ul class="feature-list">
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>MTF（複数時間足）で上位足・下位足を並べても、再生位置より先の値は表示しません</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>1本送り・1本戻し・倍速再生。判断の瞬間を何度でも再現できます</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>TP/SL（利確・損切り）ラインを引きながら、含み損益をpipsで確認できます</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="shell"><img src="img/01_chart_tpsl.png" alt="チャート画面：H1とM5の2画面表示、TP/SLライン、含み損益pips、再生コントロール" width="1080" height="2172" loading="lazy"></div>
+        <figcaption>チャート画面（H1＋M5のMTF表示・TP/SL・再生バー）</figcaption>
+      </div>
+    </div>
+
+    <!-- 02 -->
+    <div class="feature-row reverse" data-reveal>
+      <div class="feature-text">
+        <div class="feature-kicker"><span class="n">02</span><span class="line"></span></div>
+        <p class="feature-pretext">あとから「なぜ入ったか」を思い出せる。</p>
+        <h3 class="tight">構造化された記録<span class="sub">　—　ワンタップで根拠を残す</span></h3>
+        <p class="body">パターン・損切り理由・自己評価を、トレードごとに記録。分類は自分の手法に合わせて、自由に編集できます。</p>
+        <ul class="feature-list">
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>「押し目買い」「戻り売り」など、タグは自由に追加・編集</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>入力ミスは1トレードずつ編集・削除。統計からの除外もできます</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="shell"><img src="img/03_trade_history.png" alt="トレード履歴画面：各トレードにパターンや損切り理由のタグ、pips・円換算の損益が並ぶ" width="1080" height="2172" loading="lazy"></div>
+        <figcaption>トレード履歴（タグ・自己評価つき）</figcaption>
+      </div>
+    </div>
+
+    <!-- 03 -->
+    <div class="feature-row" data-reveal>
+      <div class="feature-text">
+        <div class="feature-kicker"><span class="n">03</span><span class="line"></span></div>
+        <p class="feature-pretext">感覚ではなく、数字で振り返る。</p>
+        <h3 class="tight">リスクリワードの可視化<span class="sub">　—　パターン別に集計</span></h3>
+        <p class="body">記録したトレードをもとに、パターン別の件数・勝率・PF（プロフィットファクター）・pips・リスクリワードを確認できます。感覚ではなく、数字で自分の判断傾向を振り返れます。</p>
+        <ul class="feature-list">
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>パターン別の件数・勝率・PF・pips・リスクリワードを一覧表示</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>後から付け直した分類は区別して表示。集計の前提を明示します</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="shell"><img src="img/02_stats.png" alt="基本統計画面：件数・勝率・PF・期待値・平均勝ち負け・パターン別集計表" width="1080" height="2172" loading="lazy"></div>
+        <figcaption>基本統計（画面内の数値はサンプルデータによる表示例であり、成果を示すものではありません）</figcaption>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 実際の画面 ===== -->
+<section class="screens" id="screens">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Screens</span>
+      <h2>実際の画面</h2>
+      <p class="section-lead">β版の実機スクリーンショットです。開発中のため、表示は変更される場合があります。</p>
+    </div>
+    <div class="filmstrip-wrap" data-reveal>
+      <div class="filmstrip">
+        <figure>
+          <div class="shell"><img src="img/01_chart_tpsl.png" alt="チャート検証画面" width="1080" height="2172" loading="lazy"></div>
+          <figcaption><span class="num">01</span><span class="t">チャート検証</span><span class="s">上位足と下位足を見ながら1本ずつ判断できます</span></figcaption>
+        </figure>
+        <figure>
+          <div class="shell"><img src="img/02_stats.png" alt="基本統計画面" width="1080" height="2172" loading="lazy"></div>
+          <figcaption><span class="num">02</span><span class="t">基本統計</span><span class="s">勝率・PF・pips・リスクリワードを確認できます</span></figcaption>
+        </figure>
+        <figure>
+          <div class="shell"><img src="img/03_trade_history.png" alt="トレード履歴画面" width="1080" height="2172" loading="lazy"></div>
+          <figcaption><span class="num">03</span><span class="t">トレード履歴</span><span class="s">エントリー根拠・損切り理由・損益を確認できます</span></figcaption>
+        </figure>
+        <figure>
+          <div class="shell"><img src="img/04_pattern_tag.png" alt="パターン・タグ編集画面" width="1080" height="2172" loading="lazy"></div>
+          <figcaption><span class="num">04</span><span class="t">パターン編集</span><span class="s">自分の手法に合わせてタグや分類を作成できます</span></figcaption>
+        </figure>
+        <figure>
+          <div class="shell"><img src="img/05_sessions.png" alt="検証セッション一覧画面" width="1080" height="2172" loading="lazy"></div>
+          <figcaption><span class="num">05</span><span class="t">検証セッション一覧</span><span class="s">通貨ペア・時間足・期間ごとに管理できます</span></figcaption>
+        </figure>
+        <figure>
+          <div class="shell"><img src="img/06_csv_import.png" alt="CSV取込の確認画面" width="1080" height="2172" loading="lazy"></div>
+          <figcaption><span class="num">06</span><span class="t">CSV取込の確認</span><span class="s">MT4形式のCSVを取り込み、過去チャート検証に使えます</span></figcaption>
+        </figure>
+      </div>
+      <div class="filmstrip-fade left" aria-hidden="true"></div>
+      <div class="filmstrip-fade right" aria-hidden="true"></div>
+    </div>
+    <p class="filmstrip-hint">← 左右にスクロールできます →</p>
+  </div>
+</section>
+
+<!-- ===== 利用シーン ===== -->
+<section class="scenes" id="scenes">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Use Cases</span>
+      <h2>PCを開かずに、少しずつ積み上げる。</h2>
+    </div>
+    <div class="card-grid-4">
+      <div class="scene-card" data-reveal>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="#4FC3F7" stroke-width="1.7"></circle><path d="M12 7.5V12l3.2 1.8" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path></svg>
+        <p class="h">通勤中に、数本だけローソク足を進める</p>
+        <p class="s">PCを開かなくても、少しずつ検証を進められます。</p>
+      </div>
+      <div class="scene-card" data-reveal data-reveal-delay="70">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 4.8h6.4a1.5 1.5 0 011.06.44l7.3 7.3a1.5 1.5 0 010 2.12l-4.98 4.98a1.5 1.5 0 01-2.12 0l-7.3-7.3A1.5 1.5 0 014 11.28V4.8z" stroke="#4FC3F7" stroke-width="1.7" stroke-linejoin="round"></path><circle cx="8.6" cy="9.4" r="1.3" fill="#4FC3F7"></circle></svg>
+        <p class="h">気づいた判断を、その場でタグ付けする</p>
+        <p class="s">エントリー根拠や損切り理由を、忘れる前に記録できます。</p>
+      </div>
+      <div class="scene-card" data-reveal data-reveal-delay="140">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 19V10M12 19V5M19 19v-7" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path><path d="M3.5 21.5h17" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path></svg>
+        <p class="h">週末に、パターン別の傾向を振り返る</p>
+        <p class="s">どの判断がどんな結果につながったか、記録から確認できます。</p>
+      </div>
+      <div class="scene-card" data-reveal data-reveal-delay="210">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="7" y="2.8" width="10" height="18.4" rx="2.2" stroke="#4FC3F7" stroke-width="1.7"></rect><path d="M10.5 18.6h3" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path></svg>
+        <p class="h">検証・記録は、端末内でオフラインでも利用できます</p>
+        <p class="s">対応OSはAndroidです。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 開発者より ===== -->
+<section class="developer" id="developer">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">From the Developer</span>
+      <h2>開発者より</h2>
+    </div>
+    <figure class="dev-card" data-reveal>
+      <blockquote>
+        <p>個人開発で作っている、FX検証用のAndroidアプリです。</p>
+        <p>こだわったのは、<b>「未来が見えない状態で判断すること」</b>と、「あとから検証を振り返れること」です。派手な予測機能ではなく、地道な検証と記録の質を高めるための道具として開発しています。</p>
+        <p>現在はβ版です。実際に使っていただき、使いにくい点・足りない機能・分かりにくい画面についてフィードバックをいただける方を募集しています。</p>
+      </blockquote>
+      <figcaption class="dev-sig">
+        <img src="img/icon512.png" alt="" width="40" height="40" style="border-radius:9px;flex:none;">
+        <span><span class="name">SNOWCANDLE STUDIO</span><span class="role">「スマホでFX検証」開発者（個人開発）</span></span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===== β参加 ===== -->
+<section class="signup" id="signup">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Join the Beta</span>
+      <h2>β参加は、3ステップ。</h2>
+      <p class="section-lead">βテストは無料で参加できます。正式リリース後も、無料プランでは検証セッション2件・総トレード記録30件・バックアップ3回まで利用できます。有料版購入後は、すべての機能を上限なく利用できます。</p>
+      <div class="free-badges">
+        <span>検証セッション<b>2件</b></span>
+        <span>総トレード記録<b>30件</b></span>
+        <span>バックアップ<b>3回</b></span>
+      </div>
+    </div>
+
+    <div class="signup-grid">
+      <ol class="steps" data-reveal>
+        <li>
+          <span class="step-num-wrap"><span class="step-num">1</span><span class="step-rule"></span></span>
+          <span class="step-body"><span class="t">メールアドレスを登録</span><span class="s">下のフォームからメールアドレスをご登録ください。</span></span>
+        </li>
+        <li>
+          <span class="step-num-wrap"><span class="step-num">2</span><span class="step-rule"></span></span>
+          <span class="step-body"><span class="t">メールを確認する</span><span class="s">登録いただいたアドレス宛に、Google Play のテスト参加リンクをお送りします。</span></span>
+        </li>
+        <li>
+          <span class="step-num-wrap"><span class="step-num">3</span></span>
+          <span class="step-body"><span class="t">Google Play からインストール</span><span class="s">リンクからテストに参加すると、Google Play 経由でアプリをインストールできます。</span></span>
+        </li>
+        <li class="step-note">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#6E7681" stroke-width="1.5"></circle><path d="M8 7.2v4" stroke="#6E7681" stroke-width="1.5" stroke-linecap="round"></path><circle cx="8" cy="4.9" r=".9" fill="#6E7681"></circle></svg>
+          <span>Google Playの仕様上、登録いただいたメールアドレスでのみテストに参加できます。いただいたアドレスは、テスト招待および関連のご連絡にのみ使用します。</span>
+        </li>
+      </ol>
+
+      <div class="signup-card" data-reveal data-reveal-delay="90">
+        <h3>βテストに申し込む</h3>
+        <p>クローズドβの招待リンクをメールでお送りします。</p>
+
+        <form class="signup-form" id="signupForm">
+          <label for="beta-email">メールアドレス</label>
+          <input id="beta-email" name="email" type="email" required autocomplete="email" inputmode="email" placeholder="you@example.com">
+          <button type="submit" class="btn-primary" id="signupSubmitBtn">βテストに申し込む</button>
+        </form>
+        <div class="signup-sent" id="signupSent" hidden role="status">
+          <p>ご登録ありがとうございます。</p>
+          <p><strong id="signupSentEmail"></strong> で受け付けました（<span id="signupSentAt"></span> 登録）。</p>
+          <p>参加人数が集まり次第、テスト参加のご案内メールを順次お送りします（すぐには届きません。今しばらくお待ちください）。</p>
+          <p class="signup-fineprint"><a href="#" id="signupResetLink">メールアドレスが違う場合はこちら（登録し直す）</a></p>
+        </div>
+
+        <p class="signup-fineprint">登録いただくのはメールアドレスのみです。送信をもって<a href="https://snowcandlestudio.github.io/terms_of_use.html" target="_blank" rel="noopener noreferrer">利用規約</a>・<a href="https://snowcandlestudio.github.io/privacy_policy.html" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>に同意いただいたものとします。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="faq-section" id="faq">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">FAQ</span>
+      <h2>よくある質問</h2>
+    </div>
+    <div class="faq-list" data-reveal>
+      <details>
+        <summary><span class="q">Q</span><span class="t">対応OSは？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">Androidに対応しています。現在、iOS版はありません。</p>
+      </details>
+      <details>
+        <summary><span class="q">Q</span><span class="t">iOSには対応していますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">現在はAndroidを優先して開発しています。iOSは今後検討します。</p>
+      </details>
+      <details>
+        <summary><span class="q">Q</span><span class="t">βテストとは、どのくらいの完成度ですか？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">基本的な検証・記録・集計機能を試せる段階です。ただし、β版のため、不具合や表示・仕様の変更が発生する可能性があります。</p>
+      </details>
+      <details>
+        <summary><span class="q">Q</span><span class="t">無料プランと有料版で、何が違いますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">βテストは無料で参加できます。正式リリース後も、無料プランでは検証セッション2件・総トレード記録30件・バックアップ3回まで利用できます。有料版購入後は、すべての機能を上限なく利用できます。</p>
+      </details>
+      <details>
+        <summary><span class="q">Q</span><span class="t">相場データは付いていますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">同梱していません。お手持ちのヒストリカルデータ（CSV・MT4標準形式）を取り込んでご利用ください。</p>
+      </details>
+      <details>
+        <summary><span class="q">Q</span><span class="t">ネット接続は必要？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">βテスト参加リンクの受信や、Google Playからのインストールにはネット接続が必要です。インストール後の検証・記録は、オフラインでも利用できます。</p>
+      </details>
+      <details>
+        <summary><span class="q">Q</span><span class="t">投資のアドバイスはありますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">ありません。本アプリは過去チャートを使った学習・検証・記録のためのツールです。投資助言、売買推奨、利益保証は行いません。</p>
+      </details>
+      <details>
+        <summary><span class="q">Q</span><span class="t">他のチャート分析ツールと何が違いますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">一般的なチャート分析ツールは、リアルタイムの相場分析に優れています。本アプリは、先の値動きを隠して1本ずつ検証し、エントリー根拠・損切り理由・リスクリワードを記録して振り返ることに特化しています。</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 最終CTA ===== -->
+<section class="cta-final" id="cta">
+  <div class="container" data-reveal>
+    <h2>あなたの手法を、<br>過去チャートで検証する。</h2>
+    <p class="section-lead">1回の勝ち負けではなく、記録を積み重ねて傾向を見る。答えは、次の1本ではなく検証の積み重ねの中にあります。</p>
+    <a class="btn-primary" href="#signup">無料でβテストに参加する</a>
+    <p class="note">登録いただくのはメールアドレスのみです。</p>
+  </div>
+</section>
+
+<!-- ===== フッター ===== -->
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="row">
+          <img src="img/icon512.png" alt="" width="26" height="26" style="border-radius:6px;">
+          <span class="name">スマホでFX検証</span>
+        </div>
+        <p>過去チャートによるFXトレードの学習・検証・記録のためのAndroidアプリ。</p>
+      </div>
+      <nav class="footer-nav" aria-label="フッター ページ内リンク">
+        <span class="label">Menu</span>
+        <a href="#features">特長</a>
+        <a href="#screens">画面</a>
+        <a href="#signup">参加方法</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <nav class="footer-nav legal" aria-label="規約リンク">
+        <span class="label">Legal</span>
+        <a href="https://snowcandlestudio.github.io/terms_of_use.html" target="_blank" rel="noopener noreferrer">利用規約 ↗</a>
+        <a href="https://snowcandlestudio.github.io/privacy_policy.html" target="_blank" rel="noopener noreferrer">プライバシーポリシー ↗</a>
+      </nav>
+    </div>
+    <div class="footer-legal">
+      <p>本アプリは、過去チャートを用いたFXトレードの学習・検証・記録を目的としたツールです。投資助言、売買推奨、将来の利益を保証するものではありません。投資判断はご自身の責任で行ってください。</p>
+      <p>MetaTrader、MT4、MT5は各権利者の商標または登録商標です。本アプリは各権利者と提携・承認されたものではありません。</p>
+      <p class="copyright">© 2026 SnowCandle Studio</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  /* ★★★ β応募フォームの送信先：ここに2つ値を貼るだけ ★★★
+     1. SIGNUP_ACTION_URL … Googleフォームの投稿先URL
+        （フォーム編集画面ではなく、フォームのHTMLソースを表示して <form action="..."> を確認。
+         必ず ".../formResponse" で終わるURL。人が見る viewform ではない）
+     2. SIGNUP_EMAIL_FIELD … そのフォームの「メールアドレス」質問に対応する entry.XXXXXXXXX
+        （同じくフォームのHTMLソース内、メール入力欄の name="entry.xxxxxxxxx" を探す）
+     例：
+       var SIGNUP_ACTION_URL = "https://docs.google.com/forms/d/e/1FAIpQLxxxxxxx/formResponse";
+       var SIGNUP_EMAIL_FIELD = "entry.123456789";
+     ⚠️ fetchはCORS制限回避のため mode:'no-cors' を使うので、送信の成功/失敗をJS側から
+        検知できません。空欄のままだと応募ボタンは「準備中」表示になり動作しません
+        （＝設定し忘れによるサイレントな取りこぼしを防ぐフェイルセーフ）。
+        値を入れて公開する前に、必ず自分のメールアドレスで1回実際に送信し、
+        Googleフォームの回答（スプレッドシート）に届くことを目視確認してください。 */
+  var SIGNUP_ACTION_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdPv9rgTmq5AP041KJDg-TtkQPkqDD3IRzgRHWl1HJqst8dQw/formResponse";
+  var SIGNUP_EMAIL_FIELD = "entry.1628383669";
+
+  var form = document.getElementById('signupForm');
+  var sentBox = document.getElementById('signupSent');
+  var submitBtn = document.getElementById('signupSubmitBtn');
+  var sentEmailEl = document.getElementById('signupSentEmail');
+  var sentAtEl = document.getElementById('signupSentAt');
+  var resetLink = document.getElementById('signupResetLink');
+
+  /* 入力ミス対策：申込済みのメールアドレス/日時を localStorage に保存し、
+     次回訪問時も同じ「登録済み」画面を表示する（フォームは静的サイトのためサーバー側の記録を持てない）。
+     「いつ配信されたか」は招待メールの実送信（手動・後日）ではなく「いつ申し込んだか」の登録日時。 */
+  var STORAGE_KEY = 'fxkensho_beta_signup';
+
+  function fmtDateTime(iso){
+    try {
+      return new Date(iso).toLocaleString('ja-JP', {
+        year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+      });
+    } catch (err) { return ''; }
+  }
+
+  function showSent(email, at){
+    sentEmailEl.textContent = email;
+    sentAtEl.textContent = fmtDateTime(at);
+    form.hidden = true;
+    sentBox.hidden = false;
+  }
+
+  function saveSignup(email){
+    var record = { email: email, at: new Date().toISOString() };
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(record)); } catch (err) {}
+    return record;
+  }
+
+  function loadSignup(){
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (err) { return null; }
+  }
+
+  var existing = loadSignup();
+  if (existing && existing.email) {
+    showSent(existing.email, existing.at);
+  }
+
+  resetLink.addEventListener('click', function(e){
+    e.preventDefault();
+    /* ここでは localStorage を消さない：新しいメールで送信が成功するまでは前回の登録を保持し、
+       未送信のままリロード/離脱した場合は前回の登録完了画面に復元されるようにする。 */
+    sentBox.hidden = true;
+    form.hidden = false;
+    document.getElementById('beta-email').focus();
+  });
+
+  if (!SIGNUP_ACTION_URL || !SIGNUP_EMAIL_FIELD) {
+    submitBtn.textContent = '応募フォームは準備中です（近日公開）';
+    submitBtn.disabled = true;
+    submitBtn.className = 'btn-disabled';
+  } else {
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var email = document.getElementById('beta-email').value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+      var body = new URLSearchParams();
+      body.set(SIGNUP_EMAIL_FIELD, email);
+      try {
+        fetch(SIGNUP_ACTION_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body.toString()
+        }).catch(function(){});
+      } catch (err) {}
+      var record = saveSignup(email);
+      showSent(record.email, record.at);
+    });
+  }
+
+  /* ===== ナビ：スクロールで背景を濃くする ===== */
+  var nav = document.getElementById('siteNav');
+  var onScroll = function(){
+    if (window.scrollY > 10) nav.classList.add('is-scrolled');
+    else nav.classList.remove('is-scrolled');
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ===== スクロールリビール（プログレッシブエンハンスメント） ===== */
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduced && 'IntersectionObserver' in window) {
+    var vh = window.innerHeight || 800;
+    var els = Array.prototype.slice.call(document.querySelectorAll('[data-reveal]'));
+    els.forEach(function(el){
+      var r = el.getBoundingClientRect();
+      if (r.top < vh * 0.9) return; // 既に画面内なら非表示にしない
+      el.classList.add('is-armed');
+      var delay = el.getAttribute('data-reveal-delay');
+      if (delay) el.style.transitionDelay = delay + 'ms';
+    });
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (en.isIntersecting) {
+          en.target.classList.add('is-visible');
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -6% 0px' });
+    els.forEach(function(el){ if (el.classList.contains('is-armed')) io.observe(el); });
+  }
+})();
+</script>
+</body>
+</html>
