@@ -743,6 +743,14 @@
       e.preventDefault();
       var email = document.getElementById('beta-email').value.trim();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+
+      /* 同一ブラウザでの重複送信対策：直前に登録済みの同じアドレスなら再送信せず、
+         元の登録日時のまま「登録済み」画面を表示する（Googleフォームへの二重送信を防ぐ）。 */
+      if (existing && existing.email && existing.email.toLowerCase() === email.toLowerCase()) {
+        showSent(existing.email, existing.at);
+        return;
+      }
+
       var body = new URLSearchParams();
       body.set(SIGNUP_EMAIL_FIELD, email);
       try {
@@ -753,8 +761,8 @@
           body: body.toString()
         }).catch(function(){});
       } catch (err) {}
-      var record = saveSignup(email);
-      showSent(record.email, record.at);
+      existing = saveSignup(email);
+      showSent(existing.email, existing.at);
     });
   }
 
