@@ -4,31 +4,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!--
-  スマホでFX検証 — ランディングページ（β募集）
+  スマホでFX検証 — ランディングページ
   ─────────────────────────────────────────────
-  出典：コピー = docs/lp/lp_copy_ja.md／構成・視覚デザイン = docs/lp/claude_design_source.dc.html
-        （Claude Designで作成した版をプレーンHTML/CSS/JSへ移植。GitHub Pagesでの静的公開に対応）
-        デザイントークン = docs/design/design.md（Hex厳守）
+  出典：コピー = docs/lp/lp_copy_ja.md（正本）／構成・視覚デザイン = docs/lp/claude_design_source.dc.html
+        デザイントークン = docs/design/design.md（Hex厳守）／撮影リスト = docs/lp/screenshot_plan.md
   公開：GitHub Pages（SnowCandleStudio/snowcandlestudio.github.io リポジトリ直下へ
         index.html と img/ をそのままアップロード）
 
-  ★差し替え必須（β応募フォーム）：下部 <script> 冒頭の
-    SIGNUP_ACTION_URL … Googleフォームの投稿先（.../formResponse。閲覧用viewformではない）
-    SIGNUP_EMAIL_FIELD … そのフォームのメール質問に対応する entry.XXXXXXXXX
-  ⚠️ fetchはmode:'no-cors'のため送信成功/失敗をJSから検知できません。
-     本番公開前に必ず自分のメールアドレスで実送信し、Googleフォームの回答シートに
-     実際に届くか目視確認すること（未設定の間は「準備中」表示になりリンク切れは起きない）。
+  ★β表示と正式版表示の切り替え（2026-09-23〜）
+    すぐ下の <script> の PLAY_STORE_URL が
+      空  … β表示（クローズドテストの応募フォーム・「正式版の料金（予定）」）
+      URL … 正式版表示（Google Playボタン。βの文言はすべて隠れる）
+    公開日の手順：PLAY_STORE_URL に Google Play のURLを貼る → GitHub Pages へ再アップロード。
+    出し分けは data-mode="beta" / data-mode="launch"。JSが動かない環境ではβ表示になる。
 
-  不変制約：投資助言NG（勝てる/稼げる/儲かる/将来予測なし）・アクセントは cyan 1色のみ・
+  ★β応募フォーム：下部 <script> の SIGNUP_ACTION_URL / SIGNUP_EMAIL_FIELD（設定済み）。
+    ⚠️ fetchはmode:'no-cors'のため送信成功/失敗をJSから検知できません。
+       値を変えたら必ず自分のメールアドレスで実送信し、Googleフォームの回答シートに届くか目視確認すること。
+
+  ★料金：金額は「料金」節（#pricing）にだけ書く。値上げの条件・手順は docs/decisions/0004_pricing_model.md 追記。
+
+  不変制約：投資助言NG（勝てる/稼げる/儲かる/将来予測なし）・「今だけ」等の表現なし・アクセントは cyan 1色のみ・
   競合名（TradingView等）は名指ししない（docs/requirements/optimization_worksheet_lp.md §2）。
 -->
-<title>スマホでFX検証 | 過去チャートで裁量検証・記録できるAndroidアプリ（クローズドβ募集）</title>
-<meta name="description" content="スマホで過去チャートを1本ずつ検証。エントリー理由・損切り理由・リスクリワードまで記録できるFX検証アプリ。Android向けクローズドβテスターを募集しています。">
+<script>
+  /* ★★★ 公開日にここへ Google Play のURLを貼るだけ（空のあいだはβ表示） ★★★
+     例：var PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=xxxx"; */
+  var PLAY_STORE_URL = "";
+  if (PLAY_STORE_URL) document.documentElement.classList.add('is-launch');
+</script>
+<title>スマホでFX検証 | 過去チャートの検証と記録をスマホで（Androidアプリ）</title>
+<meta name="description" content="PCを開かなくても、スマホで過去チャートを1本ずつ進めて検証。エントリーの理由と結果を記録し、パターン別の数字で振り返れるAndroidアプリです。">
 <meta name="theme-color" content="#0E1116">
 <link rel="icon" type="image/png" href="img/icon512.png">
 <meta property="og:type" content="website">
-<meta property="og:title" content="スマホでFX検証 | 過去チャートで裁量検証・記録できるAndroidアプリ">
-<meta property="og:description" content="スマホで過去チャートを1本ずつ検証。エントリー理由・損切り理由・リスクリワードまで記録できるFX検証アプリ。クローズドβ募集中。">
+<meta property="og:title" content="スマホでFX検証 | 過去チャートの検証と記録をスマホで">
+<meta property="og:description" content="PCを開かなくても、スマホで過去チャートを1本ずつ進めて検証。エントリーの理由と結果を記録し、パターン別の数字で振り返れるAndroidアプリです。">
 <meta property="og:url" content="https://snowcandlestudio.github.io/">
 <meta property="og:image" content="https://snowcandlestudio.github.io/img/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -265,6 +276,51 @@
   [data-reveal].is-armed.is-visible{opacity:1;transform:none;}
   @media(prefers-reduced-motion:reduce){[data-reveal].is-armed{opacity:1;transform:none;transition:none;}}
 
+
+  /* ===== β／正式版の出し分け（PLAY_STORE_URL） ===== */
+  html.is-launch [data-mode="beta"]{display:none !important;}
+  html:not(.is-launch) [data-mode="launch"]{display:none !important;}
+
+  /* ===== 日本語の改行位置（文節で折り返す・非対応ブラウザは従来どおり） ===== */
+  h1,h2,h3,.subline,.subcopy,.section-lead,.problems-close,.icon-card p,.scene-card p,.feature-text p.body,.feature-list li,.filmstrip .s,.faq-list .a,.price-table th,.price-card .desc,.price-foot,.step-body .s{word-break:auto-phrase;}
+  h1,h2{text-wrap:balance;}
+
+  /* ===== 新設セクション共通 ===== */
+  .band-soft{background:var(--canvas-soft);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);}
+  .band .container{padding:clamp(72px,9vw,108px) 24px;}
+  .icon-card.accent svg{display:block;}
+  .card-grid-3.six{grid-template-columns:repeat(auto-fit,minmax(250px,1fr));}
+  .developer{background:var(--canvas);border-top:none;border-bottom:none;}
+
+  /* ===== 料金 ===== */
+  .price-note-top{display:inline-flex;margin-top:14px;border:1px solid rgba(255,183,77,.5);background:rgba(255,183,77,.08);color:var(--pending);font-weight:700;font-size:12.5px;padding:5px 11px;border-radius:8px;}
+  .price-table-wrap{margin:clamp(30px,4vw,42px) auto 0;max-width:760px;background:var(--surface);border:1px solid var(--hairline);border-radius:12px;overflow:hidden;}
+  .price-table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.6;}
+  .price-table th,.price-table td{padding:13px 14px;border-bottom:1px solid var(--hairline);text-align:center;vertical-align:middle;}
+  .price-table tr:last-child th,.price-table tr:last-child td{border-bottom:none;}
+  .price-table thead th{background:var(--surface-raised);color:var(--ink);font-weight:700;font-size:13.5px;}
+  .price-table thead th.pro{color:var(--primary);}
+  .price-table tbody th{text-align:left;font-weight:500;color:var(--ink-2);}
+  .price-table tbody th small{display:block;font-size:11.5px;color:var(--ink-muted);font-weight:400;}
+  .price-table td{color:var(--ink);font-weight:600;white-space:nowrap;width:22%;}
+  .price-table td.pro{color:var(--primary);}
+  .price-table td.none{color:var(--ink-faint);font-weight:400;}
+  .price-cards{margin:22px auto 0;max-width:760px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;}
+  .price-card{background:var(--surface);border:1px solid var(--hairline);border-radius:12px;padding:24px 22px;text-align:center;}
+  .price-card.main{border-color:rgba(79,195,247,.55);background:linear-gradient(180deg,rgba(79,195,247,.07),rgba(79,195,247,0) 70%),var(--surface);}
+  .price-card .label{font-weight:700;font-size:13.5px;color:var(--ink-2);}
+  .price-card .amount{margin-top:8px;font-weight:800;font-size:34px;letter-spacing:-.02em;color:var(--ink);line-height:1.2;}
+  .price-card .amount small{font-size:14px;font-weight:600;color:var(--ink-2);margin-left:4px;}
+  .price-card .desc{margin-top:8px;font-size:13px;line-height:1.7;color:var(--ink-muted);}
+  .price-foot{margin:18px auto 0;max-width:760px;font-size:12.5px;line-height:1.8;color:var(--ink-muted);text-align:center;}
+  @media(max-width:480px){.price-table th,.price-table td{padding:11px 9px;font-size:13px;}.price-table td{width:20%;}}
+
+  /* ===== はじめ方（正式版） ===== */
+  .play-card{flex:1 1 380px;min-width:min(100%,300px);max-width:460px;background:var(--surface-raised);border:1px solid rgba(85,91,102,.4);border-radius:12px;padding:clamp(26px,3.5vw,34px);box-shadow:0 26px 70px rgba(0,0,0,.45);text-align:center;}
+  .play-card h3{margin:0;font-weight:700;font-size:18px;color:var(--ink);}
+  .play-card p{margin:8px 0 0;font-size:13px;line-height:1.75;color:var(--ink-muted);}
+  .play-card .btn-primary{margin-top:20px;width:100%;}
+
   @media(max-width:600px){.container{padding:0 20px;}}
 </style>
 </head>
@@ -281,10 +337,11 @@
       <div class="nav-links">
         <a href="#features">特長</a>
         <a href="#screens">画面</a>
-        <a href="#signup">参加方法</a>
+        <a href="#pricing">料金</a>
         <a href="#faq">FAQ</a>
       </div>
-      <a class="btn-primary" href="#signup">無料でβテストに参加する</a>
+      <a class="btn-primary" href="#signup" data-mode="beta">無料でテストに参加する</a>
+      <a class="btn-primary js-play-link" href="#signup" data-mode="launch">Google Playで入手</a>
     </div>
   </div>
 </nav>
@@ -294,36 +351,38 @@
   <div class="hero-grid-bg" aria-hidden="true"></div>
   <div class="hero-inner">
     <div class="hero-copy">
-      <span class="badge-beta"><span></span>クローズドβテスト 参加者募集中</span>
-      <h1>あなたの手法は、<br><span class="accent">本当に通用するか。</span></h1>
-      <p class="subline">スマホで過去チャートを1本ずつ進めながら、エントリー理由・損切り理由・リスクリワードまで記録できるFX検証アプリ。</p>
-      <p class="subcopy">先の値動きを見ずに、スキマ時間で自分の判断を検証できます。</p>
+      <span class="badge-beta" data-mode="beta">クローズドテスト 参加者募集中</span>
+      <span class="badge-beta" data-mode="launch">Android版 配信中</span>
+      <h1>PCを開かなくても、<br><span class="accent">過去チャートで検証できる。</span></h1>
+      <p class="subline">答えを見ずにローソク足を1本ずつ進めて、エントリーの理由と結果を記録。たまった記録は、パターン別の数字で振り返れます。</p>
+      <p class="subcopy">通勤中の数分からでも、少しずつ積み上げられます。</p>
       <div class="hero-cta">
-        <a class="btn-primary" href="#signup">無料でβテストに参加する</a>
+        <a class="btn-primary" href="#signup" data-mode="beta">無料でテストに参加する</a>
+        <a class="btn-primary js-play-link" href="#signup" data-mode="launch">Google Playで入手（無料）</a>
         <a class="btn-secondary" href="#features">機能を見る</a>
       </div>
       <div class="hero-badges">
-        <span><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>対応OS：Android</span>
-        <span><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>登録はメールアドレスのみ</span>
-        <span><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>検証・記録はオフラインで利用できます</span>
-        <span><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>無料プランあり（セッション3件・トレード30件/セッション・バックアップ無制限）</span>
+        <span><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>Android対応</span>
+        <span><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>インストール後はオフラインで使える</span>
+        <span><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>まずはデモデータで試せる</span>
+        <span><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>トレード記録20件まで無料</span>
       </div>
     </div>
     <div class="hero-visual">
       <div class="phone-frame">
         <div class="phone-shell">
-          <img src="img/01_chart_tpsl.png" alt="アプリのチャート検証画面。上位足H1と下位足M5を同時表示し、TP/SLライン・含み損益pips・1本ずつの再生バーを表示" width="1080" height="2172">
+          <img src="img/01_chart_tpsl.png" alt="アプリのチャート検証画面。上位足と下位足を上下に並べ、TP/SLライン・含み損益・再生ボタンを表示" width="1080" height="2172">
         </div>
         <div class="float-badge fb-lock" aria-hidden="true">
-          <span class="t"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#4FC3F7" stroke-width="1.6"></rect><path d="M5.5 7V5.5a2.5 2.5 0 015 0V7" stroke="#4FC3F7" stroke-width="1.6"></path></svg>先読みロック</span>
-          <span class="s">再生位置より先は表示しません</span>
+          <span class="t"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#4FC3F7" stroke-width="1.6"></rect><path d="M5.5 7V5.5a2.5 2.5 0 015 0V7" stroke="#4FC3F7" stroke-width="1.6"></path></svg>先の値動きは表示しない</span>
+          <span class="s">今の位置より先は隠れたまま</span>
         </div>
         <div class="float-badge fb-pattern" aria-hidden="true">
-          <span class="t">パターン別に集計</span>
-          <span class="s">勝率・PF・リスクリワードなど</span>
+          <span class="t">注文の前に理由を記録</span>
+          <span class="s">チェック項目は自分で作成</span>
         </div>
         <div class="float-badge fb-record" aria-hidden="true">
-          <span class="t">感覚ではなく、記録で振り返る</span>
+          <span class="t">パターン別に集計</span>
           <span class="s">数値はサンプルデータの表示例です</span>
         </div>
       </div>
@@ -331,19 +390,19 @@
   </div>
 </header>
 
-<!-- ===== 課題への共感 ===== -->
+<!-- ===== 課題 ===== -->
 <section class="problems" id="problems">
   <div class="container">
     <div class="section-head" data-reveal>
       <span class="eyebrow">Problem</span>
       <h2>FX検証は、必要だと分かっていても続かない。</h2>
-      <p class="section-lead">PCを開き、チャートを準備し、記録を残す。<br>その一連の流れが重いと、検証はどうしても後回しになります。</p>
+      <p class="section-lead">PCを開き、チャートを準備し、記録を残す。<br>その流れが重いと、検証はどうしても後回しになります。</p>
     </div>
     <div class="card-grid-3">
       <div class="icon-card" data-reveal>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="#6E7681" stroke-width="1.7"></circle><path d="M12 7.5V12l3 2" stroke="#6E7681" stroke-width="1.7" stroke-linecap="round"></path></svg>
-        <p class="h">検証を始めても、続かない</p>
-        <p class="s">最初の数日だけ頑張って、いつの間にかやめている。</p>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="12" rx="1.5" stroke="#6E7681" stroke-width="1.7"></rect><path d="M8 20h8" stroke="#6E7681" stroke-width="1.7" stroke-linecap="round"></path></svg>
+        <p class="h">PCを開くのが面倒で、結局やらない</p>
+        <p class="s">机に向かう時間を、毎日は確保できない。</p>
       </div>
       <div class="icon-card" data-reveal data-reveal-delay="80">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 6.5h10M4 12h16M4 17.5h13" stroke="#6E7681" stroke-width="1.7" stroke-linecap="round" stroke-dasharray="2.5 3"></path></svg>
@@ -351,38 +410,40 @@
         <p class="s">あとで見返せず、同じ失敗を繰り返してしまう。</p>
       </div>
       <div class="icon-card" data-reveal data-reveal-delay="160">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="12" rx="1.5" stroke="#6E7681" stroke-width="1.7"></rect><path d="M8 20h8" stroke="#6E7681" stroke-width="1.7" stroke-linecap="round"></path></svg>
-        <p class="h">PCを開くのが面倒で、結局やらない</p>
-        <p class="s">机に向かう時間を、毎日は確保できない。</p>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="#6E7681" stroke-width="1.7"></circle><path d="M12 7.5V12l3 2" stroke="#6E7681" stroke-width="1.7" stroke-linecap="round"></path></svg>
+        <p class="h">始めても、数日で止まってしまう</p>
+        <p class="s">最初は頑張れても、いつの間にかやめている。</p>
       </div>
     </div>
-    <p class="problems-close" data-reveal>検証が続かない理由は、やる気だけではありません。<br><b>判断・記録・振り返りを続けやすい形</b>になっていなかっただけです。</p>
+    <p class="problems-close" data-reveal>続かないのは、やる気のせいだけではありません。<br><b>準備と記録の手間が重すぎた</b>だけです。</p>
   </div>
 </section>
 
-<!-- ===== 解決（3つ） ===== -->
+<!-- ===== 特長（4つ） ===== -->
 <section class="features" id="features">
   <div class="container">
     <div class="section-head" data-reveal>
       <span class="eyebrow">Features</span>
-      <h2>検証を続けるための、3つの設計。</h2>
+      <h2>検証を続けるための、4つの設計。</h2>
     </div>
 
     <!-- 01 -->
     <div class="feature-row" data-reveal>
       <div class="feature-text">
         <div class="feature-kicker"><span class="n">01</span><span class="line"></span></div>
-        <h3>先読みロック<span class="sub">　—　先の値動きを隠して、1本ずつ検証</span></h3>
-        <p class="body">再生位置より先のローソク足やテクニカル指標の値は表示しません。未来の値動きを見ずに、エントリー判断を練習できます。</p>
+        <p class="feature-pretext">本番に近い状態で練習する</p>
+        <h3 class="tight">答えを見ずに、1本ずつ進める</h3>
+        <p class="body">今の位置より先のローソク足とインジケーターは表示しません。上位足と下位足の2画面を並べて、1本送り・自動再生・逆再生で判断の瞬間を再現できます。</p>
         <ul class="feature-list">
-          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>MTF（複数時間足）で上位足・下位足を並べても、再生位置より先の値は表示しません</li>
-          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>1本送り・1本戻し・倍速再生。判断の瞬間を何度でも再現できます</li>
-          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>TP/SL（利確・損切り）ラインを引きながら、含み損益をpipsで確認できます</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>1分足から週足まで。表示は最大600本</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>成行・指値・逆指値に対応。利確（TP）・損切り（SL）はラインをドラッグして設定し、含み損益はpipsと円で表示</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>スプレッド・手数料を銘柄ごとに設定でき、約定価格に反映</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>描いたラインに価格が届いたら、再生を自動で一時停止</li>
         </ul>
       </div>
       <div class="feature-visual">
-        <div class="shell"><img src="img/01_chart_tpsl.png" alt="チャート画面：H1とM5の2画面表示、TP/SLライン、含み損益pips、再生コントロール" width="1080" height="2172" loading="lazy"></div>
-        <figcaption>チャート画面（H1＋M5のMTF表示・TP/SL・再生バー）</figcaption>
+        <div class="shell"><img src="img/01_chart_tpsl.png" alt="チャート画面：上位足と下位足の2画面表示、TP/SLライン、含み損益、再生ボタン" width="1080" height="2172" loading="lazy"></div>
+        <figcaption>チャート画面（上位足＋下位足・TP/SL・再生）</figcaption>
       </div>
     </div>
 
@@ -390,17 +451,18 @@
     <div class="feature-row reverse" data-reveal>
       <div class="feature-text">
         <div class="feature-kicker"><span class="n">02</span><span class="line"></span></div>
-        <p class="feature-pretext">あとから「なぜ入ったか」を思い出せる。</p>
-        <h3 class="tight">構造化された記録<span class="sub">　—　ワンタップで根拠を残す</span></h3>
-        <p class="body">パターン・損切り理由・自己評価を、トレードごとに記録。分類は自分の手法に合わせて、自由に編集できます。</p>
+        <p class="feature-pretext">あとから「なぜ入ったか」を思い出せる</p>
+        <h3 class="tight">エントリーの理由を、注文の前に残す</h3>
+        <p class="body">自分で決めたチェック項目に答えてから発注します。「必須」にした項目は、答えるまで発注できません。パターン・損切りの理由・自己評価も、トレードごとに記録できます。</p>
         <ul class="feature-list">
-          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>「押し目買い」「戻り売り」など、タグは自由に追加・編集</li>
-          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>入力ミスは1トレードずつ編集・削除。統計からの除外もできます</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>あとから書き換えた理由は、エントリー時の理由と分けて表示</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>項目はすべて自分で作成（特定の教材の内容は入っていません）</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>入力ミスは1件ずつ編集・削除でき、集計から外すこともできます</li>
         </ul>
       </div>
       <div class="feature-visual">
-        <div class="shell"><img src="img/03_trade_history.png" alt="トレード履歴画面：各トレードにパターンや損切り理由のタグ、pips・円換算の損益が並ぶ" width="1080" height="2172" loading="lazy"></div>
-        <figcaption>トレード履歴（タグ・自己評価つき）</figcaption>
+        <div class="shell"><img src="img/04_pattern_tag.png" alt="エントリー時のパターン選択画面：自分で作ったパターンから選んで記録する" width="1080" height="2172" loading="lazy"></div>
+        <figcaption>エントリー時にパターンを記録（項目は自分で作成）</figcaption>
       </div>
     </div>
 
@@ -408,17 +470,104 @@
     <div class="feature-row" data-reveal>
       <div class="feature-text">
         <div class="feature-kicker"><span class="n">03</span><span class="line"></span></div>
-        <p class="feature-pretext">感覚ではなく、数字で振り返る。</p>
-        <h3 class="tight">リスクリワードの可視化<span class="sub">　—　パターン別に集計</span></h3>
-        <p class="body">記録したトレードをもとに、パターン別の件数・勝率・PF（プロフィットファクター）・pips・リスクリワードを確認できます。感覚ではなく、数字で自分の判断傾向を振り返れます。</p>
+        <p class="feature-pretext">同じ場面を、何度でも</p>
+        <h3 class="tight">答え合わせをして、同じ場面をやり直す</h3>
+        <p class="body">決済したトレードを一覧から選ぶと、エントリーから決済までを1画面に収めて見返せます。「注文時までやり直す」を選べば、注文の直前に戻って同じ場面をもう一度検証できます。</p>
         <ul class="feature-list">
-          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>パターン別の件数・勝率・PF・pips・リスクリワードを一覧表示</li>
-          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>後から付け直した分類は区別して表示。集計の前提を明示します</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>位置スライダーや逆再生で戻った位置から、「ここから再開」で検証を続けられます</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>トレードごとに、そのときのチャートと記録をまとめて確認</li>
         </ul>
       </div>
       <div class="feature-visual">
-        <div class="shell"><img src="img/02_stats.png" alt="基本統計画面：件数・勝率・PF・期待値・平均勝ち負け・パターン別集計表" width="1080" height="2172" loading="lazy"></div>
+        <div class="shell"><img src="img/03_trade_history.png" alt="トレード履歴画面：各トレードの理由・損切りの理由・損益が並ぶ" width="1080" height="2172" loading="lazy"></div>
+        <figcaption>トレード履歴（ここから見返す・やり直す）</figcaption>
+      </div>
+    </div>
+
+    <!-- 04 -->
+    <div class="feature-row reverse" data-reveal>
+      <div class="feature-text">
+        <div class="feature-kicker"><span class="n">04</span><span class="line"></span></div>
+        <p class="feature-pretext">感覚ではなく、数字で</p>
+        <h3 class="tight">数字で振り返る</h3>
+        <p class="body">勝率・PF（プロフィットファクター）・pips期待値・平均リスクリワード・最大ドローダウン・平均保有時間などを、パターン別・損切りの理由別に自動で集計します。月ごとの推移も確認できます。</p>
+        <ul class="feature-list">
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>件数が少ないうちは「参考」「暫定」と表示し、少ない件数の数字を断定しません</li>
+          <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>含み損・含み益の最大幅（MAE・MFE）も確認できます</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="shell"><img src="img/02_stats.png" alt="基本統計画面：件数・勝率・PF・期待値・パターン別集計" width="1080" height="2172" loading="lazy"></div>
         <figcaption>基本統計（画面内の数値はサンプルデータによる表示例であり、成果を示すものではありません）</figcaption>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== スマホで操作しやすく ===== -->
+<section class="band band-soft" id="mobile">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Made for Mobile</span>
+      <h2>スマホの指で使うことを前提に、<br>細かく作り込みました。</h2>
+    </div>
+    <div class="card-grid-3 six">
+      <div class="icon-card" data-reveal>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="6.5" y="2.8" width="11" height="18.4" rx="2.2" stroke="#4FC3F7" stroke-width="1.7"></rect><path d="M9 16.5h6" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path></svg>
+        <p class="h">よく使うボタンは、親指が届く位置に</p>
+        <p class="s">再生や描画のボタンは、チャートのすぐ下にまとめています。</p>
+      </div>
+      <div class="icon-card" data-reveal data-reveal-delay="70">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="#4FC3F7" stroke-width="1.7"></circle><path d="M15.5 15.5L20.5 20.5M8 10.5h5M10.5 8v5" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path></svg>
+        <p class="h">線を動かすときは、指先まわりを拡大表示</p>
+        <p class="s">ドラッグ中は、もう一方の画面に指の下のチャートを大きく映します。</p>
+      </div>
+      <div class="icon-card" data-reveal data-reveal-delay="140">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="10" rx="2" stroke="#4FC3F7" stroke-width="1.7"></rect><path d="M8 10.5V7.5a4 4 0 018 0v3" stroke="#4FC3F7" stroke-width="1.7"></path></svg>
+        <p class="h">「固定」で、うっかり触れても線が動かない</p>
+        <p class="s">スクロールや拡大の最中に、引いた線を動かしてしまうのを防げます。</p>
+      </div>
+      <div class="icon-card" data-reveal>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="3.5" width="17" height="17" rx="2" stroke="#4FC3F7" stroke-width="1.7"></rect><path d="M3.5 10h17M3.5 15.5h17" stroke="#4FC3F7" stroke-width="1.7"></path></svg>
+        <p class="h">3つの画面の高さを、指で調整</p>
+        <p class="s">上段・下段・オシレーターの境目をドラッグして、見やすい比率に変えられます。</p>
+      </div>
+      <div class="icon-card" data-reveal data-reveal-delay="70">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 18L20 6" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path><circle cx="4" cy="18" r="1.8" fill="#4FC3F7"></circle><circle cx="20" cy="6" r="1.8" fill="#4FC3F7"></circle></svg>
+        <p class="h">描画ツール16種</p>
+        <p class="s">水平線・トレンドライン・チャネル・フィボナッチ・リスクリワード測定など。</p>
+      </div>
+      <div class="icon-card" data-reveal data-reveal-delay="140">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 16c3-6 5-6 7-2s4 4 7-3 3-4 4-4" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path></svg>
+        <p class="h">主要なインジケーターをひととおり</p>
+        <p class="s">移動平均線・ボリンジャーバンド・一目均衡表・ZigZag、RSI・MACD・ストキャスティクス・RCI・ATR。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== はじめてでも、すぐ試せる ===== -->
+<section class="band" id="easy-start">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Getting Started</span>
+      <h2>はじめてでも、すぐ試せる。</h2>
+    </div>
+    <div class="card-grid-3">
+      <div class="icon-card" data-reveal>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="#4FC3F7" stroke-width="1.7"></circle><path d="M10 8.5l5 3.5-5 3.5v-7z" fill="#4FC3F7"></path></svg>
+        <p class="h">インストールしたら、まずデモで</p>
+        <p class="s">練習用のデモデータですぐに操作を試せます。デモは合成データで、実在の相場ではありません。</p>
+      </div>
+      <div class="icon-card" data-reveal data-reveal-delay="80">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3.2" stroke="#4FC3F7" stroke-width="1.7"></circle><path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path></svg>
+        <p class="h">ガイドツアーで、順番に案内</p>
+        <p class="s">画面の要素を光らせながら、1つずつ操作を案内します。ヘルプと用語集もアプリの中にあります。</p>
+      </div>
+      <div class="icon-card" data-reveal data-reveal-delay="160">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 3.5h8l4 4v13H6v-17z" stroke="#4FC3F7" stroke-width="1.7" stroke-linejoin="round"></path><path d="M9 12.5h6M9 16h6" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path></svg>
+        <p class="h">自分の相場は、CSVで取り込む</p>
+        <p class="s">MT4・MT5から書き出したCSVに対応しています。相場データはアプリに含まれていません。</p>
       </div>
     </div>
   </div>
@@ -430,33 +579,33 @@
     <div class="section-head" data-reveal>
       <span class="eyebrow">Screens</span>
       <h2>実際の画面</h2>
-      <p class="section-lead">β版の実機スクリーンショットです。開発中のため、表示は変更される場合があります。</p>
+      <p class="section-lead">実際のアプリの画面です。<span data-mode="beta">開発中のため、表示が変わることがあります。</span></p>
     </div>
     <div class="filmstrip-wrap" data-reveal>
       <div class="filmstrip">
         <figure>
           <div class="shell"><img src="img/01_chart_tpsl.png" alt="チャート検証画面" width="1080" height="2172" loading="lazy"></div>
-          <figcaption><span class="num">01</span><span class="t">チャート検証</span><span class="s">上位足と下位足を見ながら1本ずつ判断できます</span></figcaption>
+          <figcaption><span class="num">01</span><span class="t">チャート検証</span><span class="s">上位足と下位足を見ながら1本ずつ判断</span></figcaption>
         </figure>
         <figure>
           <div class="shell"><img src="img/02_stats.png" alt="基本統計画面" width="1080" height="2172" loading="lazy"></div>
-          <figcaption><span class="num">02</span><span class="t">基本統計</span><span class="s">勝率・PF・pips・リスクリワードを確認できます</span></figcaption>
+          <figcaption><span class="num">02</span><span class="t">基本統計</span><span class="s">勝率・PF・pips・リスクリワードなど（数値はサンプル）</span></figcaption>
         </figure>
         <figure>
           <div class="shell"><img src="img/03_trade_history.png" alt="トレード履歴画面" width="1080" height="2172" loading="lazy"></div>
-          <figcaption><span class="num">03</span><span class="t">トレード履歴</span><span class="s">エントリー根拠・損切り理由・損益を確認できます</span></figcaption>
+          <figcaption><span class="num">03</span><span class="t">トレード履歴</span><span class="s">理由・損切りの理由・損益を一覧で確認</span></figcaption>
         </figure>
         <figure>
-          <div class="shell"><img src="img/04_pattern_tag.png" alt="パターン・タグ編集画面" width="1080" height="2172" loading="lazy"></div>
-          <figcaption><span class="num">04</span><span class="t">パターン編集</span><span class="s">自分の手法に合わせてタグや分類を作成できます</span></figcaption>
+          <div class="shell"><img src="img/04_pattern_tag.png" alt="パターンの記録画面" width="1080" height="2172" loading="lazy"></div>
+          <figcaption><span class="num">04</span><span class="t">パターンの記録</span><span class="s">自分で作ったパターンから、エントリー時に選んで残す</span></figcaption>
         </figure>
         <figure>
           <div class="shell"><img src="img/05_sessions.png" alt="検証セッション一覧画面" width="1080" height="2172" loading="lazy"></div>
-          <figcaption><span class="num">05</span><span class="t">検証セッション一覧</span><span class="s">通貨ペア・時間足・期間ごとに管理できます</span></figcaption>
+          <figcaption><span class="num">05</span><span class="t">検証セッション一覧</span><span class="s">通貨ペア・時間足・期間ごとに管理</span></figcaption>
         </figure>
         <figure>
           <div class="shell"><img src="img/06_csv_import.png" alt="CSV取込の確認画面" width="1080" height="2172" loading="lazy"></div>
-          <figcaption><span class="num">06</span><span class="t">CSV取込の確認</span><span class="s">MT4形式のCSVを取り込み、過去チャート検証に使えます</span></figcaption>
+          <figcaption><span class="num">06</span><span class="t">CSV取込の確認</span><span class="s">取り込む前に、推定した足と期間を確認</span></figcaption>
         </figure>
       </div>
       <div class="filmstrip-fade left" aria-hidden="true"></div>
@@ -476,25 +625,60 @@
     <div class="card-grid-4">
       <div class="scene-card" data-reveal>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="#4FC3F7" stroke-width="1.7"></circle><path d="M12 7.5V12l3.2 1.8" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path></svg>
-        <p class="h">通勤中に、数本だけローソク足を進める</p>
+        <p class="h">通勤中に、数本だけ進める</p>
         <p class="s">PCを開かなくても、少しずつ検証を進められます。</p>
       </div>
       <div class="scene-card" data-reveal data-reveal-delay="70">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 4.8h6.4a1.5 1.5 0 011.06.44l7.3 7.3a1.5 1.5 0 010 2.12l-4.98 4.98a1.5 1.5 0 01-2.12 0l-7.3-7.3A1.5 1.5 0 014 11.28V4.8z" stroke="#4FC3F7" stroke-width="1.7" stroke-linejoin="round"></path><circle cx="8.6" cy="9.4" r="1.3" fill="#4FC3F7"></circle></svg>
-        <p class="h">気づいた判断を、その場でタグ付けする</p>
-        <p class="s">エントリー根拠や損切り理由を、忘れる前に記録できます。</p>
+        <p class="h">気づいた理由を、その場で残す</p>
+        <p class="s">エントリーの理由や損切りの理由を、忘れる前に記録できます。</p>
       </div>
       <div class="scene-card" data-reveal data-reveal-delay="140">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 19V10M12 19V5M19 19v-7" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path><path d="M3.5 21.5h17" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path></svg>
-        <p class="h">週末に、パターン別の傾向を振り返る</p>
+        <p class="h">週末に、パターン別の傾向を見返す</p>
         <p class="s">どの判断がどんな結果につながったか、記録から確認できます。</p>
       </div>
-      <div class="scene-card" data-reveal data-reveal-delay="210">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="7" y="2.8" width="10" height="18.4" rx="2.2" stroke="#4FC3F7" stroke-width="1.7"></rect><path d="M10.5 18.6h3" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path></svg>
-        <p class="h">検証・記録は、端末内でオフラインでも利用できます</p>
-        <p class="s">対応OSはAndroidです。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 料金（金額はこの節にだけ書く） ===== -->
+<section class="band band-soft" id="pricing">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Pricing</span>
+      <span class="price-note-top" data-mode="beta">正式版の料金（予定）</span>
+      <h2>まずは無料で。<br>続けたくなったらProへ。</h2>
+      <p class="section-lead">インジケーター・描画ツール・統計は、無料プランでもすべて使えます。</p>
+    </div>
+    <div class="price-table-wrap" data-reveal>
+      <table class="price-table">
+        <thead>
+          <tr><th scope="col"></th><th scope="col">無料</th><th scope="col" class="pro">Pro</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">検証セッション</th><td>3まで</td><td class="pro">無制限</td></tr>
+          <tr><th scope="row">トレード記録<small>全セッション合計・デモは数えない</small></th><td>20件</td><td class="pro">無制限</td></tr>
+          <tr><th scope="row">オリジナル時間足</th><td class="none">—</td><td class="pro">✓</td></tr>
+          <tr><th scope="row">トレード記録のCSV書き出し</th><td class="none">—</td><td class="pro">✓</td></tr>
+          <tr><th scope="row">バックアップの書き出し・復元</th><td>無制限</td><td class="pro">無制限</td></tr>
+          <tr><th scope="row">インジケーター・描画ツール・基本統計・CSV取込</th><td>すべて</td><td class="pro">すべて</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="price-cards" data-reveal>
+      <div class="price-card main">
+        <p class="label">Pro 月額</p>
+        <p class="amount">¥500<small>／月（税込）</small></p>
+        <p class="desc">毎月自動で更新。いつでも解約できます。</p>
+      </div>
+      <div class="price-card">
+        <p class="label">Pro 買い切り</p>
+        <p class="amount">¥2,980<small>（税込）</small></p>
+        <p class="desc">一度の購入でずっとPro。自動更新はありません。</p>
       </div>
     </div>
+    <p class="price-foot">価格は、購入時にGoogle Playで表示される金額が優先されます。<br>表示される統計は記録の集計であり、将来の成果を示すものではありません。</p>
   </div>
 </section>
 
@@ -507,71 +691,102 @@
     </div>
     <figure class="dev-card" data-reveal>
       <blockquote>
-        <p>個人開発で作っている、FX検証用のAndroidアプリです。</p>
-        <p>こだわったのは、<b>「未来が見えない状態で判断すること」</b>と、「あとから検証を振り返れること」です。派手な予測機能ではなく、地道な検証と記録の質を高めるための道具として開発しています。</p>
-        <p>現在はβ版です。実際に使っていただき、使いにくい点・足りない機能・分かりにくい画面についてフィードバックをいただける方を募集しています。</p>
+        <p>個人で開発している、FX検証用のAndroidアプリです。</p>
+        <p>こだわったのは、<b>「先が見えない状態で判断すること」</b>と、「あとから理由と結果を見返せること」です。派手な予測機能ではなく、地道な検証と記録を続けるための道具として作っています。</p>
+        <p>クローズドテストでいただいた声をもとに、1本送りの動き・ガイドツアー・線の操作などを直してきました。<span data-mode="beta">使いにくい点・分かりにくい画面を教えてくださる方を、引き続き募集しています。</span><span data-mode="launch">気づいたことは、アプリの「設定→フィードバック・問い合わせ」からお寄せください。</span></p>
       </blockquote>
       <figcaption class="dev-sig">
         <img src="img/icon512.png" alt="" width="40" height="40" style="border-radius:9px;flex:none;">
-        <span><span class="name">SNOWCANDLE STUDIO</span><span class="role">「スマホでFX検証」開発者（個人開発）</span></span>
+        <span><span class="name">SnowCandleStudio</span><span class="role">「スマホでFX検証」開発者（個人開発）</span></span>
       </figcaption>
     </figure>
   </div>
 </section>
 
-<!-- ===== β参加 ===== -->
+<!-- ===== はじめ方（β＝応募／正式版＝Google Play） ===== -->
 <section class="signup" id="signup">
   <div class="container">
-    <div class="section-head" data-reveal>
-      <span class="eyebrow">Join the Beta</span>
-      <h2>β参加は、3ステップ。</h2>
-      <p class="section-lead">βテストは無料で参加できます。正式リリース後も、無料プランでは検証セッション3件・トレード記録は1セッションにつき30件まで利用でき、バックアップの書き出し・復元は無料版でも無制限です。有料版購入後は、セッション・トレードを上限なく利用できます。</p>
-      <div class="free-badges">
-        <span>検証セッション<b>3件</b></span>
-        <span>トレード記録<b>30件/セッション</b></span>
-        <span>バックアップ<b>無制限</b></span>
+
+    <!-- β表示 -->
+    <div data-mode="beta">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">Join the Test</span>
+        <h2>テスト参加は、3ステップ。</h2>
+        <p class="section-lead">テストへの参加は無料です。登録したメールアドレス宛に、Google Playのテスト参加リンクをお送りします。</p>
       </div>
-    </div>
 
-    <div class="signup-grid">
-      <ol class="steps" data-reveal>
-        <li>
-          <span class="step-num-wrap"><span class="step-num">1</span><span class="step-rule"></span></span>
-          <span class="step-body"><span class="t">メールアドレスを登録</span><span class="s">下のフォームからメールアドレスをご登録ください。</span></span>
-        </li>
-        <li>
-          <span class="step-num-wrap"><span class="step-num">2</span><span class="step-rule"></span></span>
-          <span class="step-body"><span class="t">メールを確認する</span><span class="s">登録いただいたアドレス宛に、Google Play のテスト参加リンクをお送りします。</span></span>
-        </li>
-        <li>
-          <span class="step-num-wrap"><span class="step-num">3</span></span>
-          <span class="step-body"><span class="t">Google Play からインストール</span><span class="s">リンクからテストに参加すると、Google Play 経由でアプリをインストールできます。</span></span>
-        </li>
-        <li class="step-note">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#6E7681" stroke-width="1.5"></circle><path d="M8 7.2v4" stroke="#6E7681" stroke-width="1.5" stroke-linecap="round"></path><circle cx="8" cy="4.9" r=".9" fill="#6E7681"></circle></svg>
-          <span>Google Playの仕様上、登録いただいたメールアドレスでのみテストに参加できます。いただいたアドレスは、テスト招待および関連のご連絡にのみ使用します。</span>
-        </li>
-      </ol>
+      <div class="signup-grid">
+        <ol class="steps" data-reveal>
+          <li>
+            <span class="step-num-wrap"><span class="step-num">1</span><span class="step-rule"></span></span>
+            <span class="step-body"><span class="t">メールアドレスを登録</span><span class="s">下のフォームからメールアドレスをご登録ください。</span></span>
+          </li>
+          <li>
+            <span class="step-num-wrap"><span class="step-num">2</span><span class="step-rule"></span></span>
+            <span class="step-body"><span class="t">メールを確認する</span><span class="s">登録いただいたアドレス宛に、Google Playのテスト参加リンクをお送りします。</span></span>
+          </li>
+          <li>
+            <span class="step-num-wrap"><span class="step-num">3</span></span>
+            <span class="step-body"><span class="t">Google Playからインストール</span><span class="s">リンクからテストに参加すると、Google Play経由でインストールできます。</span></span>
+          </li>
+          <li class="step-note">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#6E7681" stroke-width="1.5"></circle><path d="M8 7.2v4" stroke="#6E7681" stroke-width="1.5" stroke-linecap="round"></path><circle cx="8" cy="4.9" r=".9" fill="#6E7681"></circle></svg>
+            <span>Google Playの仕様上、登録いただいたメールアドレスでのみテストに参加できます。いただいたアドレスは、テストのご案内と関連のご連絡にのみ使用します。</span>
+          </li>
+        </ol>
 
-      <div class="signup-card" data-reveal data-reveal-delay="90">
-        <h3>βテストに申し込む</h3>
-        <p>クローズドβの招待リンクをメールでお送りします。</p>
+        <div class="signup-card" data-reveal data-reveal-delay="90">
+          <h3>テストに申し込む</h3>
+          <p>テスト参加のご案内をメールでお送りします。</p>
 
-        <form class="signup-form" id="signupForm">
-          <label for="beta-email">メールアドレス</label>
-          <input id="beta-email" name="email" type="email" required autocomplete="email" inputmode="email" placeholder="you@example.com">
-          <button type="submit" class="btn-primary" id="signupSubmitBtn">βテストに申し込む</button>
-        </form>
-        <div class="signup-sent" id="signupSent" hidden role="status">
-          <p>ご登録ありがとうございます。</p>
-          <p><strong id="signupSentEmail"></strong> で受け付けました（<span id="signupSentAt"></span> 登録）。</p>
-          <p>参加人数が集まり次第、テスト参加のご案内メールを順次お送りします（すぐには届きません。今しばらくお待ちください）。</p>
-          <p class="signup-fineprint"><a href="#" id="signupResetLink">メールアドレスが違う場合はこちら（登録し直す）</a></p>
+          <form class="signup-form" id="signupForm">
+            <label for="beta-email">メールアドレス</label>
+            <input id="beta-email" name="email" type="email" required autocomplete="email" inputmode="email" placeholder="you@example.com">
+            <button type="submit" class="btn-primary" id="signupSubmitBtn">テストに申し込む</button>
+          </form>
+          <div class="signup-sent" id="signupSent" hidden role="status">
+            <p>ご登録ありがとうございます。</p>
+            <p><strong id="signupSentEmail"></strong> で受け付けました（<span id="signupSentAt"></span> 登録）。</p>
+            <p>テスト参加のご案内メールを順次お送りします（すぐには届きません。今しばらくお待ちください）。</p>
+            <p class="signup-fineprint"><a href="#" id="signupResetLink">メールアドレスが違う場合はこちら（登録し直す）</a></p>
+          </div>
+
+          <p class="signup-fineprint">登録いただくのはメールアドレスのみです。送信をもって<a href="https://snowcandlestudio.github.io/terms_of_use.html" target="_blank" rel="noopener noreferrer">利用規約</a>・<a href="https://snowcandlestudio.github.io/privacy_policy.html" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>に同意いただいたものとします。</p>
         </div>
-
-        <p class="signup-fineprint">登録いただくのはメールアドレスのみです。送信をもって<a href="https://snowcandlestudio.github.io/terms_of_use.html" target="_blank" rel="noopener noreferrer">利用規約</a>・<a href="https://snowcandlestudio.github.io/privacy_policy.html" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>に同意いただいたものとします。</p>
       </div>
     </div>
+
+    <!-- 正式版表示 -->
+    <div data-mode="launch">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">Get Started</span>
+        <h2>Google Playから、無料ではじめる。</h2>
+      </div>
+
+      <div class="signup-grid">
+        <ol class="steps" data-reveal>
+          <li>
+            <span class="step-num-wrap"><span class="step-num">1</span><span class="step-rule"></span></span>
+            <span class="step-body"><span class="t">Google Playからインストール</span><span class="s">ダウンロードは無料です。</span></span>
+          </li>
+          <li>
+            <span class="step-num-wrap"><span class="step-num">2</span><span class="step-rule"></span></span>
+            <span class="step-body"><span class="t">デモで操作を試す</span><span class="s">練習用のデモデータで、すぐに触れます。</span></span>
+          </li>
+          <li>
+            <span class="step-num-wrap"><span class="step-num">3</span></span>
+            <span class="step-body"><span class="t">自分のCSVを取り込んで検証</span><span class="s">MT4・MT5から書き出したCSVを取り込みます。</span></span>
+          </li>
+        </ol>
+
+        <div class="play-card" data-reveal data-reveal-delay="90">
+          <h3>スマホでFX検証</h3>
+          <p>Android対応・ダウンロード無料</p>
+          <a class="btn-primary js-play-link" href="#signup">Google Playで入手（無料）</a>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -584,28 +799,32 @@
     </div>
     <div class="faq-list" data-reveal>
       <details>
-        <summary><span class="q">Q</span><span class="t">対応OSは？</span><span class="plus" aria-hidden="true">＋</span></summary>
-        <p class="a">Androidに対応しています。現在、iOS版はありません。</p>
-      </details>
-      <details>
-        <summary><span class="q">Q</span><span class="t">iOSには対応していますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
-        <p class="a">現在はAndroidを優先して開発しています。iOSは今後検討します。</p>
-      </details>
-      <details>
-        <summary><span class="q">Q</span><span class="t">βテストとは、どのくらいの完成度ですか？</span><span class="plus" aria-hidden="true">＋</span></summary>
-        <p class="a">基本的な検証・記録・集計機能を試せる段階です。ただし、β版のため、不具合や表示・仕様の変更が発生する可能性があります。</p>
-      </details>
-      <details>
-        <summary><span class="q">Q</span><span class="t">無料プランと有料版で、何が違いますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
-        <p class="a">βテストは無料で参加できます。正式リリース後も、無料プランでは検証セッション3件・トレード記録は1セッションにつき30件まで利用でき、バックアップの書き出し・復元は無料版でも無制限です。有料版購入後は、セッション・トレードを上限なく利用できます。</p>
+        <summary><span class="q">Q</span><span class="t">対応している端末は？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">Androidのスマートフォンに対応しています。iOS版は今のところありません。</p>
       </details>
       <details>
         <summary><span class="q">Q</span><span class="t">相場データは付いていますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
-        <p class="a">同梱していません。お手持ちのヒストリカルデータ（CSV・MT4標準形式）を取り込んでご利用ください。</p>
+        <p class="a">付いていません。MT4・MT5から書き出したCSV（ローソク足のデータ）を取り込んで使います。取り込む前に、練習用のデモデータで操作を試せます。</p>
       </details>
       <details>
-        <summary><span class="q">Q</span><span class="t">ネット接続は必要？</span><span class="plus" aria-hidden="true">＋</span></summary>
-        <p class="a">βテスト参加リンクの受信や、Google Playからのインストールにはネット接続が必要です。インストール後の検証・記録は、オフラインでも利用できます。</p>
+        <summary><span class="q">Q</span><span class="t">CSVはどうやって用意しますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">MT4なら、対象の通貨ペア・時間足のチャートを開き、「ツール→ヒストリーセンター」（F2）から「エクスポート」で書き出せます。MT5のバー書き出しにも対応しています。書き出したCSVは、USB接続・Googleドライブ・自分宛のメールなどでスマホへ移し、アプリの「設定→CSV取込」から選びます。手順はアプリ内ヘルプ「自分の相場を取り込む（CSV）」にもまとめています。ヒストリカルデータの入手・利用は、各提供元の規約に従ってください。</p>
+      </details>
+      <details>
+        <summary><span class="q">Q</span><span class="t">無料でどこまで使えますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">検証セッションは3つまで、トレード記録は全セッション合計で20件まで無料です（デモのセッション・トレードは数えません）。インジケーター・描画ツール・基本統計・CSV取込・バックアップは無料でも使えます。Proでは件数の上限がなくなり、オリジナル時間足とトレード記録のCSV書き出しも使えます。</p>
+      </details>
+      <details>
+        <summary><span class="q">Q</span><span class="t">月額と買い切りの違いは？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">月額は毎月自動で更新され、Google Playの「定期購入」からいつでも解約できます。解約すると次の更新日以降は請求されません（日割りの返金はありません）。買い切りは一度の購入でProが続き、自動更新はありません。月額から買い切りに切り替えるときは、Google Playで月額の定期購入を解約してください。</p>
+      </details>
+      <details>
+        <summary><span class="q">Q</span><span class="t">インターネット接続は必要ですか？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">インストールと購入のときに必要です。検証・記録はオフラインでも使えます。</p>
+      </details>
+      <details>
+        <summary><span class="q">Q</span><span class="t">記録はどこに保存されますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">検証の記録はスマホの中に保存されます（アプリ内購入のときだけ、購入の確認に必要な情報が決済管理サービスに送られます）。機種変更のときは、バックアップを書き出して新しい端末で復元してください。</p>
       </details>
       <details>
         <summary><span class="q">Q</span><span class="t">投資のアドバイスはありますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
@@ -613,7 +832,11 @@
       </details>
       <details>
         <summary><span class="q">Q</span><span class="t">他のチャート分析ツールと何が違いますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
-        <p class="a">一般的なチャート分析ツールは、リアルタイムの相場分析に優れています。本アプリは、先の値動きを隠して1本ずつ検証し、エントリー根拠・損切り理由・リスクリワードを記録して振り返ることに特化しています。</p>
+        <p class="a">一般的なチャート分析ツールは、リアルタイムの相場分析が得意です。本アプリは、先の値動きを隠して1本ずつ検証し、エントリーの理由・損切りの理由・結果を記録して振り返ることに特化しています。</p>
+      </details>
+      <details data-mode="beta">
+        <summary><span class="q">Q</span><span class="t">テスト版は、どのくらいの完成度ですか？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">検証・記録・集計の機能はひととおり使えます。テスト中のため、不具合や表示・仕様の変更が起きることがあります。</p>
       </details>
     </div>
   </div>
@@ -622,10 +845,16 @@
 <!-- ===== 最終CTA ===== -->
 <section class="cta-final" id="cta">
   <div class="container" data-reveal>
-    <h2>あなたの手法を、<br>過去チャートで検証する。</h2>
-    <p class="section-lead">1回の勝ち負けではなく、記録を積み重ねて傾向を見る。答えは、次の1本ではなく検証の積み重ねの中にあります。</p>
-    <a class="btn-primary" href="#signup">無料でβテストに参加する</a>
-    <p class="note">登録いただくのはメールアドレスのみです。</p>
+    <h2>スキマ時間の数分から、<br>検証を積み上げる。</h2>
+    <p class="section-lead">1回の勝ち負けではなく、記録を重ねて自分の傾向を見る。そのための道具です。</p>
+    <div data-mode="beta">
+      <a class="btn-primary" href="#signup">無料でテストに参加する</a>
+      <p class="note">登録いただくのはメールアドレスのみです。</p>
+    </div>
+    <div data-mode="launch">
+      <a class="btn-primary js-play-link" href="#signup">Google Playで入手（無料）</a>
+      <p class="note">Android対応・ダウンロード無料</p>
+    </div>
   </div>
 </section>
 
@@ -644,39 +873,43 @@
         <span class="label">Menu</span>
         <a href="#features">特長</a>
         <a href="#screens">画面</a>
-        <a href="#signup">参加方法</a>
+        <a href="#pricing">料金</a>
+        <a href="#signup" data-mode="beta">参加方法</a>
+        <a href="#signup" data-mode="launch">はじめ方</a>
         <a href="#faq">FAQ</a>
       </nav>
       <nav class="footer-nav legal" aria-label="規約リンク">
         <span class="label">Legal</span>
         <a href="https://snowcandlestudio.github.io/terms_of_use.html" target="_blank" rel="noopener noreferrer">利用規約 ↗</a>
         <a href="https://snowcandlestudio.github.io/privacy_policy.html" target="_blank" rel="noopener noreferrer">プライバシーポリシー ↗</a>
+        <a href="https://snowcandlestudio.github.io/commercial_transactions.html" target="_blank" rel="noopener noreferrer">特定商取引法に基づく表記 ↗</a>
       </nav>
     </div>
     <div class="footer-legal">
       <p>本アプリは、過去チャートを用いたFXトレードの学習・検証・記録を目的としたツールです。投資助言、売買推奨、将来の利益を保証するものではありません。投資判断はご自身の責任で行ってください。</p>
       <p>MetaTrader、MT4、MT5は各権利者の商標または登録商標です。本アプリは各権利者と提携・承認されたものではありません。</p>
-      <p class="copyright">© 2026 SnowCandle Studio</p>
+      <p class="copyright">© 2026 SnowCandleStudio</p>
     </div>
   </div>
 </footer>
 
 <script>
 (function(){
-  /* ★★★ β応募フォームの送信先：ここに2つ値を貼るだけ ★★★
-     1. SIGNUP_ACTION_URL … Googleフォームの投稿先URL
-        （フォーム編集画面ではなく、フォームのHTMLソースを表示して <form action="..."> を確認。
-         必ず ".../formResponse" で終わるURL。人が見る viewform ではない）
+  /* ===== 正式版表示：Google Playへのリンクを差し込む（PLAY_STORE_URL は <head> 冒頭で設定） ===== */
+  if (typeof PLAY_STORE_URL === 'string' && PLAY_STORE_URL) {
+    Array.prototype.forEach.call(document.querySelectorAll('.js-play-link'), function(a){
+      a.href = PLAY_STORE_URL;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+    });
+  }
+
+  /* ★★★ β応募フォームの送信先 ★★★
+     1. SIGNUP_ACTION_URL … Googleフォームの投稿先URL（".../formResponse" で終わる。viewformではない）
      2. SIGNUP_EMAIL_FIELD … そのフォームの「メールアドレス」質問に対応する entry.XXXXXXXXX
-        （同じくフォームのHTMLソース内、メール入力欄の name="entry.xxxxxxxxx" を探す）
-     例：
-       var SIGNUP_ACTION_URL = "https://docs.google.com/forms/d/e/1FAIpQLxxxxxxx/formResponse";
-       var SIGNUP_EMAIL_FIELD = "entry.123456789";
-     ⚠️ fetchはCORS制限回避のため mode:'no-cors' を使うので、送信の成功/失敗をJS側から
-        検知できません。空欄のままだと応募ボタンは「準備中」表示になり動作しません
-        （＝設定し忘れによるサイレントな取りこぼしを防ぐフェイルセーフ）。
-        値を入れて公開する前に、必ず自分のメールアドレスで1回実際に送信し、
-        Googleフォームの回答（スプレッドシート）に届くことを目視確認してください。 */
+     ⚠️ fetchはCORS制限回避のため mode:'no-cors' を使うので、送信の成功/失敗をJS側から検知できません。
+        空欄だと応募ボタンは「準備中」表示になります（設定し忘れによる取りこぼし防止）。
+        値を変えたら必ず自分のメールアドレスで1回実際に送信し、回答シートに届くことを目視確認してください。 */
   var SIGNUP_ACTION_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdPv9rgTmq5AP041KJDg-TtkQPkqDD3IRzgRHWl1HJqst8dQw/formResponse";
   var SIGNUP_EMAIL_FIELD = "entry.1628383669";
 
@@ -688,8 +921,7 @@
   var resetLink = document.getElementById('signupResetLink');
 
   /* 入力ミス対策：申込済みのメールアドレス/日時を localStorage に保存し、
-     次回訪問時も同じ「登録済み」画面を表示する（フォームは静的サイトのためサーバー側の記録を持てない）。
-     「いつ配信されたか」は招待メールの実送信（手動・後日）ではなく「いつ申し込んだか」の登録日時。 */
+     次回訪問時も同じ「登録済み」画面を表示する（静的サイトのためサーバー側の記録を持てない）。 */
   var STORAGE_KEY = 'fxkensho_beta_signup';
 
   function fmtDateTime(iso){
@@ -727,8 +959,7 @@
 
   resetLink.addEventListener('click', function(e){
     e.preventDefault();
-    /* ここでは localStorage を消さない：新しいメールで送信が成功するまでは前回の登録を保持し、
-       未送信のままリロード/離脱した場合は前回の登録完了画面に復元されるようにする。 */
+    /* ここでは localStorage を消さない：新しいメールで送信するまでは前回の登録を保持する。 */
     sentBox.hidden = true;
     form.hidden = false;
     document.getElementById('beta-email').focus();
@@ -744,8 +975,7 @@
       var email = document.getElementById('beta-email').value.trim();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
 
-      /* 同一ブラウザでの重複送信対策：直前に登録済みの同じアドレスなら再送信せず、
-         元の登録日時のまま「登録済み」画面を表示する（Googleフォームへの二重送信を防ぐ）。 */
+      /* 同一ブラウザでの重複送信対策：直前に登録済みの同じアドレスなら再送信しない。 */
       if (existing && existing.email && existing.email.toLowerCase() === email.toLowerCase()) {
         showSent(existing.email, existing.at);
         return;
