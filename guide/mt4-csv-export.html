@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+  記事ページ：MT4・MT5からCSVを書き出してスマホに取り込む手順（2026-11-15 SEO）
+  内容の正本はアプリ内ヘルプ「自分の相場を取り込む（CSV）」（lib/chart/chart_view.dart）。アプリの仕様が変わったらここも直す。
+  不変制約：投資助言NG・相場データを配布しない（入手先の名指しもしない）・競合名を名指ししない。
+-->
+<title>MT4・MT5からCSVを書き出してスマホに取り込む手順 | スマホでFX検証</title>
+<meta name="description" content="MT4のヒストリーセンター・MT5のバー書き出しでローソク足のCSVを用意し、Androidスマホへ移して、FX過去検証アプリ「スマホでFX検証」に取り込むまでの手順。うまくいかない時の確認点もまとめました。">
+<meta name="theme-color" content="#0E1116">
+<link rel="canonical" href="https://snowcandlestudio.github.io/guide/mt4-csv-export.html">
+<link rel="icon" type="image/png" href="../img/icon512.png">
+<meta property="og:site_name" content="スマホでFX検証">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MT4・MT5からCSVを書き出してスマホに取り込む手順">
+<meta property="og:description" content="ローソク足のCSVを用意して、Androidスマホで過去検証を始めるまでの手順。">
+<meta property="og:url" content="https://snowcandlestudio.github.io/guide/mt4-csv-export.html">
+<meta property="og:image" content="https://snowcandlestudio.github.io/img/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="guide.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "MT4・MT5からCSVを書き出してスマホに取り込む手順",
+      "description": "MT4のヒストリーセンター・MT5のバー書き出しでローソク足のCSVを用意し、Androidスマホへ移して取り込むまでの手順。",
+      "inLanguage": "ja",
+      "datePublished": "2026-11-15",
+      "dateModified": "2026-11-15",
+      "author": { "@type": "Organization", "name": "SnowCandleStudio", "url": "https://snowcandlestudio.github.io/" },
+      "publisher": { "@type": "Organization", "name": "SnowCandleStudio", "logo": { "@type": "ImageObject", "url": "https://snowcandlestudio.github.io/img/icon512.png" } },
+      "image": "https://snowcandlestudio.github.io/img/08_csv_import.png",
+      "mainEntityOfPage": "https://snowcandlestudio.github.io/guide/mt4-csv-export.html"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "スマホでFX検証", "item": "https://snowcandlestudio.github.io/" },
+        { "@type": "ListItem", "position": 2, "name": "MT4・MT5からCSVを書き出してスマホに取り込む手順", "item": "https://snowcandlestudio.github.io/guide/mt4-csv-export.html" }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="g-nav">
+  <div class="g-nav-inner">
+    <a class="g-brand" href="../"><img src="../img/icon512.png" alt="" width="28" height="28">スマホでFX検証</a>
+    <a class="g-cta" href="https://play.google.com/store/apps/details?id=com.fxkensho.fx_kensho&amp;utm_source=lp_guide&amp;utm_medium=web" target="_blank" rel="noopener">Google Playで入手</a>
+  </div>
+</header>
+
+<main class="g-main">
+  <p class="g-crumb"><a href="../">スマホでFX検証</a> › 読みもの</p>
+  <h1>MT4・MT5からCSVを書き出して、スマホに取り込む手順</h1>
+  <p class="g-meta">2026年11月15日 ・ SnowCandleStudio（「スマホでFX検証」の開発者）</p>
+
+  <p class="g-lead">スマホでFXの過去検証（バックテスト）をするには、検証したい通貨ペアのローソク足のデータ（CSV）が必要です。この記事では、MT4・MT5でCSVを書き出し、Androidスマホへ移して、過去検証アプリ「スマホでFX検証」に取り込むまでの流れをまとめます。</p>
+
+  <div class="g-note">先に操作だけ試したい場合は、CSVがなくても始められます。アプリには練習用のデモデータ（合成データ）が入っているので、インストールしてすぐに1本送りや注文を試せます。</div>
+
+  <nav class="g-toc" aria-label="目次">
+    <p>目次</p>
+    <ol>
+      <li><a href="#prepare">用意するもの</a></li>
+      <li><a href="#mt4">MT4で書き出す（ヒストリーセンター）</a></li>
+      <li><a href="#mt5">MT5で書き出す（バーの書き出し）</a></li>
+      <li><a href="#transfer">CSVをスマホへ移す</a></li>
+      <li><a href="#import">アプリに取り込む</a></li>
+      <li><a href="#trouble">うまくいかない時</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="prepare">1. 用意するもの</h2>
+  <ul>
+    <li><b>PCのMT4またはMT5</b>：CSVを書き出すときだけ使います。取り込んだ後の検証・記録・集計はスマホで完結します。</li>
+    <li><b>Androidスマホ</b>：「スマホでFX検証」をインストールしておきます（ダウンロード無料）。</li>
+    <li><b>CSVをスマホへ移す手段</b>：Googleドライブ・自分宛てのメール・USBケーブルのどれか。</li>
+  </ul>
+  <p>アプリに相場データは入っていません。データは自分で用意して取り込む仕組みです。<b>ヒストリカルデータの入手・利用は、各提供元の規約に従ってください。</b>再配布が禁止されているデータもあるので注意してください。</p>
+
+  <h2 id="mt4">2. MT4で書き出す（ヒストリーセンター）</h2>
+  <ol class="g-steps">
+    <li>MT4で、検証したい通貨ペア・時間足のチャートを開きます。必要な期間分、チャートを左へスクロールしてデータを読み込んでおきます。</li>
+    <li>メニューの<b>「ツール」→「ヒストリーセンター」</b>を開きます（F2キーでも開けます）。</li>
+    <li>一覧から通貨ペアと時間足を選び、<b>「エクスポート」</b>を押して <code>.csv</code> で保存します。</li>
+    <li>ファイル名に通貨ペアと時間足が分かる名前を付けておくと、取り込むときに自動で推定する助けになります（例：<code>USDJPY_M5.csv</code>）。</li>
+  </ol>
+  <div class="g-note"><b>どの時間足を書き出すか</b>：アプリは取り込んだ足から上位の足を自動で作ります。たとえば1分足を取り込めば、5分足・15分足・1時間足・4時間足・日足・週足も表示できます。反対に、取り込んだ足より細かい足（1時間足を取り込んだときの5分足など）は表示できません。細かい足で検証したいなら、細かい足を書き出しておくのが基本です。</div>
+  <p>読み込めるデータの量は、MT4の設定やデータの提供元によって変わります。思ったより短い期間しか出てこないときは、MT4のオプションにある「ヒストリー内の最大バー数」なども確認してみてください（表記はバージョンにより異なることがあります）。</p>
+
+  <h2 id="mt5">3. MT5で書き出す（バーの書き出し）</h2>
+  <p>MT5のバー（ローソク足）の書き出しにも対応しています。一般的な手順は次のとおりです（メニューの表記はバージョンにより異なることがあります）。</p>
+  <ol class="g-steps">
+    <li>メニューの「表示」→「銘柄」（Ctrl+U）を開きます。</li>
+    <li>「バー」のタブで通貨ペア・時間足・期間を選び、データを表示させます。</li>
+    <li>「バーをエクスポート」で <code>.csv</code> に保存します。</li>
+  </ol>
+  <p>ティック（BID/ASK）形式の書き出しには対応していません。<b>バー（OHLC）の書き出し</b>を使ってください。MT4・MT5以外のCSVでも、「日時の列＋始値・高値・安値・終値の列」があれば取り込めます。</p>
+
+  <h2 id="transfer">4. CSVをスマホへ移す</h2>
+  <p>次のどれかで、CSVをスマホに保存します。</p>
+  <ul>
+    <li><b>Googleドライブ</b>：PCからアップロードし、スマホでダウンロードします。</li>
+    <li><b>自分宛てのメール</b>：CSVを添付して送り、スマホで添付ファイルを保存します。</li>
+    <li><b>USBケーブル</b>：PCとスマホをつないで、スマホの「Download」フォルダなどへコピーします。</li>
+  </ul>
+
+  <h2 id="import">5. アプリに取り込む</h2>
+  <ol class="g-steps">
+    <li>アプリの<b>「設定」→「CSV取込」</b>を開き、保存したCSVを選びます。複数のファイルを同時に選んで、つなげて取り込むこともできます。</li>
+    <li>取り込む前の確認画面で、<b>推定した時間足・期間・スキップした行・重複・プレビュー</b>を確認します。</li>
+    <li>取り込むと、自動で新しい「セッション」（検証データの単位）になります。あとは1本ずつ進めて検証するだけです。</li>
+  </ol>
+  <figure class="g-fig">
+    <img src="../img/08_csv_import.png" alt="CSV取込の確認画面。推定した時間足と期間、プレビューを表示" width="1080" height="2160" loading="lazy">
+    <figcaption>取り込む前の確認画面</figcaption>
+  </figure>
+  <p>取り込むときの「タイムゾーン（メモ）」欄は任意です。CSVの時刻がどの時間帯か（例：<code>JST</code>、<code>GMT+2</code>）をメモしておく欄で、検証や集計の結果には影響しません。</p>
+
+  <h2 id="trouble">6. うまくいかない時</h2>
+  <ul>
+    <li><b>列の並び</b>：「日付, 時刻, 始値, 高値, 安値, 終値」または「日時, 始値, 高値, 安値, 終値」になっているか確認してください。</li>
+    <li><b>区切り文字</b>：カンマ・セミコロン・タブは自動で判定します。</li>
+    <li><b>日時の形</b>：<code>2024.01.31 13:45</code> のような形に対応しています。</li>
+    <li><b>文字化け</b>：見出しに日本語を含む場合は、UTF-8で保存し直してください。</li>
+    <li><b>時刻のずれ</b>：MT4のサーバー時間のまま取り込まれます。時間帯のずれは検証には影響しません。</li>
+  </ul>
+  <p>同じ内容は、アプリ内のヘルプ「自分の相場を取り込む（CSV）」にもまとめています。</p>
+
+  <div class="g-warn">本アプリは、過去チャートを用いたFXトレードの学習・検証・記録を目的としたツールです。投資助言、売買推奨、将来の利益を保証するものではありません。MetaTrader、MT4、MT5は各権利者の商標または登録商標です。本アプリは各権利者と提携・承認されたものではありません。</div>
+
+  <div class="g-box">
+    <p class="t">スマホでFX検証（Android）</p>
+    <p class="s">ダウンロード無料・トレード記録20件まで無料・デモデータですぐ試せます</p>
+    <a class="btn" href="https://play.google.com/store/apps/details?id=com.fxkensho.fx_kensho&amp;utm_source=lp_guide&amp;utm_medium=web" target="_blank" rel="noopener">Google Playで入手（無料）</a>
+  </div>
+
+  <div class="g-related">
+    <p>関連する読みもの</p>
+    <ul>
+      <li><a href="android-fx-backtest.html">AndroidスマホでFXの過去検証（バックテスト）をするやり方</a></li>
+      <li><a href="https://note.com/snowcandlestudio/n/n3e2e614fcbc7" target="_blank" rel="noopener">note：スマホでFXの過去検証をする手順と、続けるためのコツ</a></li>
+    </ul>
+  </div>
+</main>
+
+<footer class="g-foot">
+  <div class="g-foot-inner">
+    <nav aria-label="サイト内リンク">
+      <a href="../">トップ</a>
+      <a href="android-fx-backtest.html">過去検証のやり方</a>
+      <a href="mt4-csv-export.html">CSVの書き出し手順</a>
+      <a href="../terms_of_use.html">利用規約</a>
+      <a href="../privacy_policy.html">プライバシーポリシー</a>
+      <a href="../commercial_transactions.html">特定商取引法に基づく表記</a>
+    </nav>
+    <p>© 2026 SnowCandleStudio</p>
+  </div>
+</footer>
+
+</body>
+</html>

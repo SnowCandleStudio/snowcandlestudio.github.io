@@ -9,40 +9,68 @@
   出典：コピー = docs/lp/lp_copy_ja.md（正本）／構成・視覚デザイン = docs/lp/claude_design_source.dc.html
         デザイントークン = docs/design/design.md（Hex厳守）／撮影リスト = docs/lp/screenshot_plan.md
   公開：GitHub Pages（SnowCandleStudio/snowcandlestudio.github.io リポジトリ直下へ
-        index.html と img/ をそのままアップロード）
+        index.html・img/・guide/・robots.txt・sitemap.xml をそのままアップロード）
 
-  ★β表示と正式版表示の切り替え（2026-09-23〜）
-    すぐ下の <script> の PLAY_STORE_URL が
-      空  … β表示（クローズドテストの応募フォーム・「正式版の料金（予定）」）
-      URL … 正式版表示（Google Playボタン。βの文言はすべて隠れる）
-    公開日の手順：PLAY_STORE_URL に Google Play のURLを貼る → GitHub Pages へ再アップロード。
-    出し分けは data-mode="beta" / data-mode="launch"。JSが動かない環境ではβ表示になる。
-
-  ★β応募フォーム：下部 <script> の SIGNUP_ACTION_URL / SIGNUP_EMAIL_FIELD（設定済み）。
-    ⚠️ fetchはmode:'no-cors'のため送信成功/失敗をJSから検知できません。
-       値を変えたら必ず自分のメールアドレスで実送信し、Googleフォームの回答シートに届くか目視確認すること。
+  ★SEO（2026-11-15）：β版の表示と応募フォーム（PLAY_STORE_URL による出し分け）は撤去し、正式版の文だけを置く
+    （隠した文もGoogleは読むため、検索結果の抜粋にβ版のボタン文言が出ていた）。
+    構造化データ（WebSite・MobileApplication）は <head> の ld+json。記事ページは guide/ 以下（guide/guide.css 共通）。
+    ページを足したら sitemap.xml にも1行足す。Google PlayのURLには utm_source=lp（記事ページは lp_guide）を付ける。
 
   ★料金：金額は「料金」節（#pricing）にだけ書く。値上げの条件・手順は docs/decisions/0004_pricing_model.md 追記。
 
   不変制約：投資助言NG（勝てる/稼げる/儲かる/将来予測なし）・「今だけ」等の表現なし・アクセントは cyan 1色のみ・
   競合名（TradingView等）は名指ししない（docs/requirements/optimization_worksheet_lp.md §2）。
 -->
-<script>
-  /* ★★★ 公開日にここへ Google Play のURLを貼るだけ（空のあいだはβ表示） ★★★
-     例：var PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=xxxx"; */
-  var PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.fxkensho.fx_kensho";
-  if (PLAY_STORE_URL) document.documentElement.classList.add('is-launch');
-</script>
 <title>スマホでFX検証 | FXのバックテスト・過去チャート検証アプリ（Android）</title>
-<meta name="description" content="FXの過去チャートを1本ずつ進めるバックテスト・トレード練習アプリ。PCを開かなくてもスマホで検証でき、エントリーの理由と結果を記録して、パターン別の数字で振り返れます（Android）。">
+<meta name="description" content="Android用のFX過去チャート検証（バックテスト）・トレード練習アプリ。答えを見ずにローソク足を1本ずつ進め、エントリーの理由と結果を記録して、パターン別の数字で振り返れます。PCを開かなくてもスマホで検証できます。">
 <meta name="theme-color" content="#0E1116">
+<link rel="canonical" href="https://snowcandlestudio.github.io/">
 <link rel="icon" type="image/png" href="img/icon512.png">
+<meta property="og:site_name" content="スマホでFX検証">
+<meta property="og:locale" content="ja_JP">
 <meta property="og:type" content="website">
 <meta property="og:title" content="スマホでFX検証 | FXのバックテスト・トレード練習をスマホで">
 <meta property="og:description" content="FXの過去チャートを1本ずつ進めるバックテスト・トレード練習アプリ。PCを開かなくてもスマホで検証でき、エントリーの理由と結果を記録して、パターン別の数字で振り返れます（Android）。">
 <meta property="og:url" content="https://snowcandlestudio.github.io/">
 <meta property="og:image" content="https://snowcandlestudio.github.io/img/og.png">
 <meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://snowcandlestudio.github.io/#website",
+      "name": "スマホでFX検証",
+      "alternateName": ["SnowCandleStudio", "スマホでFX検証 公式サイト"],
+      "url": "https://snowcandlestudio.github.io/",
+      "inLanguage": "ja"
+    },
+    {
+      "@type": "MobileApplication",
+      "@id": "https://snowcandlestudio.github.io/#app",
+      "name": "スマホでFX検証",
+      "alternateName": "スマホでFX検証 - バックテスト・トレード練習",
+      "description": "Android用のFX過去チャート検証（バックテスト・リプレイ練習）アプリ。答えを見ずにローソク足を1本ずつ進め、エントリーの理由と結果を記録して、パターン別の数字で振り返れます。相場データは含まれておらず、MT4・MT5から書き出したCSVを取り込んで使います。",
+      "operatingSystem": "ANDROID",
+      "applicationCategory": "FinanceApplication",
+      "inLanguage": "ja",
+      "url": "https://snowcandlestudio.github.io/",
+      "downloadUrl": "https://play.google.com/store/apps/details?id=com.fxkensho.fx_kensho",
+      "installUrl": "https://play.google.com/store/apps/details?id=com.fxkensho.fx_kensho",
+      "image": "https://snowcandlestudio.github.io/img/icon512.png",
+      "screenshot": [
+        "https://snowcandlestudio.github.io/img/01_chart_tpsl.png",
+        "https://snowcandlestudio.github.io/img/02_entry_checklist.png",
+        "https://snowcandlestudio.github.io/img/04_stats.png"
+      ],
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
+      "author": { "@type": "Organization", "name": "SnowCandleStudio", "url": "https://snowcandlestudio.github.io/" },
+      "sameAs": ["https://play.google.com/store/apps/details?id=com.fxkensho.fx_kensho"]
+    }
+  ]
+}
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
 
@@ -79,7 +107,6 @@
   .btn-secondary{display:inline-block;border:1px solid var(--border);color:var(--ink);font-weight:600;font-size:15px;padding:14px 26px;border-radius:8px;text-decoration:none;transition:border-color .2s,background .2s,color .2s;}
   .btn-secondary:hover{border-color:var(--primary);background:rgba(79,195,247,.06);color:var(--primary);text-decoration:none;}
   .btn-secondary:active{background:rgba(79,195,247,.1);}
-  .btn-disabled{display:inline-block;width:100%;background:var(--surface);color:var(--ink-muted);font-weight:700;font-size:15.5px;padding:15px 20px;border:1px solid var(--border);border-radius:8px;text-align:center;cursor:default;font-family:var(--font);}
 
   /* ===== ナビ ===== */
   .nav{position:sticky;top:0;z-index:90;background:rgba(14,17,22,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(27,34,48,.45);transition:background .3s ease,border-color .3s ease,box-shadow .3s ease;}
@@ -212,25 +239,16 @@
   .steps li:last-of-type .step-body{padding-bottom:0;}
   .step-body .t{display:block;font-weight:600;font-size:16px;color:var(--ink);line-height:1.6;}
   .step-body .s{display:block;margin-top:4px;font-size:14px;line-height:1.75;color:var(--ink-2);}
-  .step-note{margin-top:26px;display:flex;gap:10px;border:1px dashed var(--border);border-radius:12px;padding:16px 18px;}
-  .step-note svg{flex:none;margin-top:4px;}
-  .step-note span{font-size:12.5px;line-height:1.8;color:var(--ink-muted);}
 
-  .signup-card{flex:1 1 380px;min-width:min(100%,300px);max-width:460px;background:var(--surface-raised);border:1px solid rgba(85,91,102,.4);border-radius:12px;padding:clamp(26px,3.5vw,34px);box-shadow:0 26px 70px rgba(0,0,0,.45);}
-  .signup-card h3{margin:0;font-weight:700;font-size:18px;letter-spacing:-.01em;color:var(--ink);}
-  .signup-card > p{margin:8px 0 0;font-size:13px;line-height:1.75;color:var(--ink-muted);}
-  .signup-form{margin-top:20px;}
-  .signup-form label{display:block;font-weight:600;font-size:13px;color:var(--ink-2);}
-  .signup-form input{margin-top:8px;width:100%;background:var(--canvas-soft);border:1px solid var(--border);border-radius:8px;color:var(--ink);font-size:15px;font-family:var(--font);padding:13px 14px;transition:border-color .2s,box-shadow .2s;}
-  .signup-form input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,195,247,.15);}
-  .signup-form button{margin-top:14px;width:100%;}
-  .signup-sent{margin-top:20px;border:1px solid rgba(79,195,247,.5);background:rgba(79,195,247,.07);border-radius:8px;padding:18px;}
-  .signup-sent p:first-child{font-weight:600;font-size:14.5px;color:var(--ink);}
-  .signup-sent p+p{margin-top:6px;font-size:13px;line-height:1.75;color:var(--ink-2);}
-  .signup-fineprint{margin:16px 0 0;font-size:12px;line-height:1.8;color:var(--ink-muted);}
-  .signup-fineprint a{color:var(--ink-2);text-decoration:underline;text-underline-offset:3px;}
-  .signup-fineprint a:hover{color:var(--primary);}
-  [hidden]{display:none !important;}
+  /* ===== 読みもの（記事ページへのリンク） ===== */
+  .guides .container{max-width:900px;padding:clamp(72px,9vw,108px) 24px;}
+  .guide-list{margin-top:clamp(30px,4vw,40px);display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+  .guide-card{display:block;background:var(--surface);border:1px solid var(--hairline);border-radius:12px;padding:22px 22px 20px;transition:transform .25s ease,border-color .25s ease;}
+  .guide-card:hover{transform:translateY(-3px);border-color:rgba(79,195,247,.55);text-decoration:none;}
+  .guide-card .k{display:block;font-weight:700;font-size:11.5px;letter-spacing:.14em;color:var(--primary);}
+  .guide-card .t{display:block;margin-top:8px;font-weight:600;font-size:15.5px;line-height:1.6;color:var(--ink);}
+  .guide-card .s{display:block;margin-top:6px;font-size:13px;line-height:1.75;color:var(--ink-muted);}
+  .inline-link{color:var(--primary);text-decoration:underline;text-underline-offset:3px;}
 
   /* ===== FAQ ===== */
   .faq-section{background:var(--canvas-soft);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);}
@@ -277,10 +295,6 @@
   @media(prefers-reduced-motion:reduce){[data-reveal].is-armed{opacity:1;transform:none;transition:none;}}
 
 
-  /* ===== β／正式版の出し分け（PLAY_STORE_URL） ===== */
-  html.is-launch [data-mode="beta"]{display:none !important;}
-  html:not(.is-launch) [data-mode="launch"]{display:none !important;}
-
   /* ===== 日本語の改行位置（文節で折り返す・非対応ブラウザは従来どおり） ===== */
   h1,h2,h3,.subline,.subcopy,.section-lead,.problems-close,.icon-card p,.scene-card p,.feature-text p.body,.feature-list li,.filmstrip .s,.faq-list .a,.price-table th,.price-card .desc,.price-foot,.step-body .s{word-break:auto-phrase;}
   h1,h2{text-wrap:balance;}
@@ -293,7 +307,6 @@
   .developer{background:var(--canvas);border-top:none;border-bottom:none;}
 
   /* ===== 料金 ===== */
-  .price-note-top{display:inline-flex;margin-top:14px;border:1px solid rgba(255,183,77,.5);background:rgba(255,183,77,.08);color:var(--pending);font-weight:700;font-size:12.5px;padding:5px 11px;border-radius:8px;}
   .price-table-wrap{margin:clamp(30px,4vw,42px) auto 0;max-width:760px;background:var(--surface);border:1px solid var(--hairline);border-radius:12px;overflow:hidden;}
   .price-table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.6;}
   .price-table th,.price-table td{padding:13px 14px;border-bottom:1px solid var(--hairline);text-align:center;vertical-align:middle;}
@@ -338,10 +351,10 @@
         <a href="#features">特長</a>
         <a href="#screens">画面</a>
         <a href="#pricing">料金</a>
+        <a href="#guides">読みもの</a>
         <a href="#faq">FAQ</a>
       </div>
-      <a class="btn-primary" href="#signup" data-mode="beta">無料でテストに参加する</a>
-      <a class="btn-primary js-play-link" href="#signup" data-mode="launch">Google Playで入手</a>
+      <a class="btn-primary" href="https://play.google.com/store/apps/details?id=com.fxkensho.fx_kensho&amp;utm_source=lp&amp;utm_medium=web" target="_blank" rel="noopener">Google Playで入手</a>
     </div>
   </div>
 </nav>
@@ -351,14 +364,12 @@
   <div class="hero-grid-bg" aria-hidden="true"></div>
   <div class="hero-inner">
     <div class="hero-copy">
-      <span class="badge-beta" data-mode="beta">クローズドテスト 参加者募集中</span>
-      <span class="badge-beta" data-mode="launch">Android版 配信中</span>
+      <span class="badge-beta">Android版 配信中</span>
       <h1>PCを開かなくても、<br><span class="accent">過去チャートで検証できる。</span></h1>
       <p class="subline">答えを見ずにローソク足を1本ずつ進めて、エントリーの理由と結果を記録。たまった記録は、パターン別の数字で振り返れます。</p>
-      <p class="subcopy">通勤中の数分からでも、少しずつ積み上げられます。</p>
+      <p class="subcopy">「スマホでFX検証」は、FXの過去チャートで検証（バックテスト・リプレイ練習）をするAndroid用のアプリです。通勤中の数分からでも、少しずつ積み上げられます。</p>
       <div class="hero-cta">
-        <a class="btn-primary" href="#signup" data-mode="beta">無料でテストに参加する</a>
-        <a class="btn-primary js-play-link" href="#signup" data-mode="launch">Google Playで入手（無料）</a>
+        <a class="btn-primary" href="https://play.google.com/store/apps/details?id=com.fxkensho.fx_kensho&amp;utm_source=lp&amp;utm_medium=web" target="_blank" rel="noopener">Google Playで入手（無料）</a>
         <a class="btn-secondary" href="#features">機能を見る</a>
       </div>
       <div class="hero-badges">
@@ -433,7 +444,7 @@
         <div class="feature-kicker"><span class="n">01</span><span class="line"></span></div>
         <p class="feature-pretext">本番に近い状態で練習する</p>
         <h3 class="tight">答えを見ずに、1本ずつ進める</h3>
-        <p class="body">今の位置より先のローソク足とインジケーターは表示しません。上位足と下位足の2画面を並べて、1本送り・自動再生・逆再生で判断の瞬間を再現できます。</p>
+        <p class="body">今の位置より先のローソク足とインジケーターは表示しません。上位足と下位足の2画面を並べたマルチタイムフレーム（MTF）表示で、1本送り・自動再生・逆再生（リプレイ）を使って判断の瞬間を再現できます。</p>
         <ul class="feature-list">
           <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>1分足から週足まで。表示は最大600本</li>
           <li><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>成行・指値・逆指値に対応。利確（TP）・損切り（SL）はラインをドラッグして設定し、含み損益はpipsと円で表示</li>
@@ -567,7 +578,7 @@
       <div class="icon-card" data-reveal data-reveal-delay="160">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 3.5h8l4 4v13H6v-17z" stroke="#4FC3F7" stroke-width="1.7" stroke-linejoin="round"></path><path d="M9 12.5h6M9 16h6" stroke="#4FC3F7" stroke-width="1.7" stroke-linecap="round"></path></svg>
         <p class="h">自分の相場は、CSVで取り込む</p>
-        <p class="s">MT4・MT5から書き出したCSVに対応しています。相場データはアプリに含まれていません。</p>
+        <p class="s">MT4・MT5から書き出したCSVに対応しています。相場データはアプリに含まれていません。<a class="inline-link" href="guide/mt4-csv-export.html">CSVの書き出し方</a></p>
       </div>
     </div>
   </div>
@@ -579,7 +590,7 @@
     <div class="section-head" data-reveal>
       <span class="eyebrow">Screens</span>
       <h2>実際の画面</h2>
-      <p class="section-lead">実際のアプリの画面です。<span data-mode="beta">開発中のため、表示が変わることがあります。</span></p>
+      <p class="section-lead">実際のアプリの画面です。</p>
     </div>
     <div class="filmstrip-wrap" data-reveal>
       <div class="filmstrip">
@@ -655,7 +666,6 @@
   <div class="container">
     <div class="section-head" data-reveal>
       <span class="eyebrow">Pricing</span>
-      <span class="price-note-top" data-mode="beta">正式版の料金（予定）</span>
       <h2>まずは無料で。<br>続けたくなったらProへ。</h2>
       <p class="section-lead">インジケーター・描画ツール・統計は、無料プランでもすべて使えます。</p>
     </div>
@@ -702,7 +712,8 @@
       <blockquote>
         <p>個人で開発している、FX検証用のAndroidアプリです。</p>
         <p>こだわったのは、<b>「先が見えない状態で判断すること」</b>と、「あとから理由と結果を見返せること」です。派手な予測機能ではなく、地道な検証と記録を続けるための道具として作っています。</p>
-        <p>クローズドテストでいただいた声をもとに、1本送りの動き・ガイドツアー・線の操作などを直してきました。<span data-mode="beta">使いにくい点・分かりにくい画面を教えてくださる方を、引き続き募集しています。</span><span data-mode="launch">気づいたことは、アプリの「設定→フィードバック・問い合わせ」からお寄せください。</span></p>
+        <p>クローズドテストでいただいた声をもとに、1本送りの動き・ガイドツアー・線の操作などを直してきました。気づいたことは、アプリの「設定→フィードバック・問い合わせ」からお寄せください。</p>
+        <p>作っている理由や検証の進め方は、noteにも書いています：<a class="inline-link" href="https://note.com/snowcandlestudio/n/n3e2e614fcbc7" target="_blank" rel="noopener">スマホでFXの過去検証（バックテスト）をする手順と、続けるためのコツ</a></p>
       </blockquote>
       <figcaption class="dev-sig">
         <img src="img/icon512.png" alt="" width="40" height="40" style="border-radius:9px;flex:none;">
@@ -712,61 +723,11 @@
   </div>
 </section>
 
-<!-- ===== はじめ方（β＝応募／正式版＝Google Play） ===== -->
+<!-- ===== はじめ方（Google Play） ===== -->
 <section class="signup" id="signup">
   <div class="container">
 
-    <!-- β表示 -->
-    <div data-mode="beta">
-      <div class="section-head" data-reveal>
-        <span class="eyebrow">Join the Test</span>
-        <h2>テスト参加は、3ステップ。</h2>
-        <p class="section-lead">テストへの参加は無料です。登録したメールアドレス宛に、Google Playのテスト参加リンクをお送りします。</p>
-      </div>
-
-      <div class="signup-grid">
-        <ol class="steps" data-reveal>
-          <li>
-            <span class="step-num-wrap"><span class="step-num">1</span><span class="step-rule"></span></span>
-            <span class="step-body"><span class="t">メールアドレスを登録</span><span class="s">下のフォームからメールアドレスをご登録ください。</span></span>
-          </li>
-          <li>
-            <span class="step-num-wrap"><span class="step-num">2</span><span class="step-rule"></span></span>
-            <span class="step-body"><span class="t">メールを確認する</span><span class="s">登録いただいたアドレス宛に、Google Playのテスト参加リンクをお送りします。</span></span>
-          </li>
-          <li>
-            <span class="step-num-wrap"><span class="step-num">3</span></span>
-            <span class="step-body"><span class="t">Google Playからインストール</span><span class="s">リンクからテストに参加すると、Google Play経由でインストールできます。</span></span>
-          </li>
-          <li class="step-note">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#6E7681" stroke-width="1.5"></circle><path d="M8 7.2v4" stroke="#6E7681" stroke-width="1.5" stroke-linecap="round"></path><circle cx="8" cy="4.9" r=".9" fill="#6E7681"></circle></svg>
-            <span>Google Playの仕様上、登録いただいたメールアドレスでのみテストに参加できます。いただいたアドレスは、テストのご案内と関連のご連絡にのみ使用します。</span>
-          </li>
-        </ol>
-
-        <div class="signup-card" data-reveal data-reveal-delay="90">
-          <h3>テストに申し込む</h3>
-          <p>テスト参加のご案内をメールでお送りします。</p>
-
-          <form class="signup-form" id="signupForm">
-            <label for="beta-email">メールアドレス</label>
-            <input id="beta-email" name="email" type="email" required autocomplete="email" inputmode="email" placeholder="you@example.com">
-            <button type="submit" class="btn-primary" id="signupSubmitBtn">テストに申し込む</button>
-          </form>
-          <div class="signup-sent" id="signupSent" hidden role="status">
-            <p>ご登録ありがとうございます。</p>
-            <p><strong id="signupSentEmail"></strong> で受け付けました（<span id="signupSentAt"></span> 登録）。</p>
-            <p>テスト参加のご案内メールを順次お送りします（すぐには届きません。今しばらくお待ちください）。</p>
-            <p class="signup-fineprint"><a href="#" id="signupResetLink">メールアドレスが違う場合はこちら（登録し直す）</a></p>
-          </div>
-
-          <p class="signup-fineprint">登録いただくのはメールアドレスのみです。送信をもって<a href="https://snowcandlestudio.github.io/terms_of_use.html" target="_blank" rel="noopener noreferrer">利用規約</a>・<a href="https://snowcandlestudio.github.io/privacy_policy.html" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>に同意いただいたものとします。</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- 正式版表示 -->
-    <div data-mode="launch">
+    <div>
       <div class="section-head" data-reveal>
         <span class="eyebrow">Get Started</span>
         <h2>Google Playから、無料ではじめる。</h2>
@@ -784,18 +745,46 @@
           </li>
           <li>
             <span class="step-num-wrap"><span class="step-num">3</span></span>
-            <span class="step-body"><span class="t">自分のCSVを取り込んで検証</span><span class="s">MT4・MT5から書き出したCSVを取り込みます。</span></span>
+            <span class="step-body"><span class="t">自分のCSVを取り込んで検証</span><span class="s">MT4・MT5から書き出したCSVを取り込みます（<a class="inline-link" href="guide/mt4-csv-export.html">書き出し方の手順</a>）。</span></span>
           </li>
         </ol>
 
         <div class="play-card" data-reveal data-reveal-delay="90">
           <h3>スマホでFX検証</h3>
           <p>Android対応・ダウンロード無料</p>
-          <a class="btn-primary js-play-link" href="#signup">Google Playで入手（無料）</a>
+          <a class="btn-primary" href="https://play.google.com/store/apps/details?id=com.fxkensho.fx_kensho&amp;utm_source=lp&amp;utm_medium=web" target="_blank" rel="noopener">Google Playで入手（無料）</a>
         </div>
       </div>
     </div>
 
+  </div>
+</section>
+
+<!-- ===== 読みもの（記事ページ・note） ===== -->
+<section class="guides" id="guides">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Guides</span>
+      <h2>読みもの</h2>
+      <p class="section-lead">スマホでFXの過去検証を始めるときに、よく聞かれることをまとめました。</p>
+    </div>
+    <div class="guide-list" data-reveal>
+      <a class="guide-card" href="guide/android-fx-backtest.html">
+        <span class="k">HOW TO</span>
+        <span class="t">AndroidスマホでFXの過去検証（バックテスト）をするやり方</span>
+        <span class="s">準備するもの・進め方・スマホの画面で検証を続ける工夫。</span>
+      </a>
+      <a class="guide-card" href="guide/mt4-csv-export.html">
+        <span class="k">CSV</span>
+        <span class="t">MT4・MT5からCSVを書き出して、スマホに取り込む手順</span>
+        <span class="s">ヒストリーセンターでの書き出し・スマホへの移し方・うまくいかない時。</span>
+      </a>
+      <a class="guide-card" href="https://note.com/snowcandlestudio/n/n3e2e614fcbc7" target="_blank" rel="noopener">
+        <span class="k">NOTE</span>
+        <span class="t">スマホでFXの過去検証をする手順と、続けるためのコツ</span>
+        <span class="s">開発者が書いたnote記事。始める前に決める3つのこと・続けるコツ。</span>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -817,7 +806,19 @@
       </details>
       <details>
         <summary><span class="q">Q</span><span class="t">CSVはどうやって用意しますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
-        <p class="a">MT4なら、対象の通貨ペア・時間足のチャートを開き、「ツール→ヒストリーセンター」（F2）から「エクスポート」で書き出せます。MT5のバー書き出しにも対応しています。書き出したCSVは、USB接続・Googleドライブ・自分宛のメールなどでスマホへ移し、アプリの「設定→CSV取込」から選びます。手順はアプリ内ヘルプ「自分の相場を取り込む（CSV）」にもまとめています。ヒストリカルデータの入手・利用は、各提供元の規約に従ってください。</p>
+        <p class="a">MT4なら、対象の通貨ペア・時間足のチャートを開き、「ツール→ヒストリーセンター」（F2）から「エクスポート」で書き出せます。MT5のバー書き出しにも対応しています。書き出したCSVは、USB接続・Googleドライブ・自分宛のメールなどでスマホへ移し、アプリの「設定→CSV取込」から選びます。詳しい手順は<a class="inline-link" href="guide/mt4-csv-export.html">MT4・MT5からCSVを書き出してスマホに取り込む手順</a>にまとめています。ヒストリカルデータの入手・利用は、各提供元の規約に従ってください。</p>
+      </details>
+      <details>
+        <summary><span class="q">Q</span><span class="t">AndroidスマホだけでFXの過去検証（バックテスト）はできますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">できます。過去チャートを1本ずつ進める手動の検証（リプレイ練習）を、Androidスマホだけで行えます。上位足と下位足を上下に並べたマルチタイムフレーム（MTF）表示、成行・指値・逆指値、TP/SLのライン操作、スプレッド・手数料の設定に対応しています。CSVを書き出すときだけPC（MT4・MT5）を使いますが、取り込んだ後の検証・記録・集計はスマホで完結します。進め方は<a class="inline-link" href="guide/android-fx-backtest.html">Androidスマホでの過去検証のやり方</a>にまとめています。</p>
+      </details>
+      <details>
+        <summary><span class="q">Q</span><span class="t">無料で使えるFX過去検証アプリですか？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">ダウンロードは無料で、インジケーター・描画ツール・統計・CSV取込は無料のまま使えます。無料の範囲は、検証セッション3つ・トレード記録が全セッション合計20件までです。デモデータでの練習は件数に数えません。上限をなくしたい場合はPro（月額・買い切り）があります。</p>
+      </details>
+      <details>
+        <summary><span class="q">Q</span><span class="t">スマホの小さい画面で、検証はやりにくくないですか？</span><span class="plus" aria-hidden="true">＋</span></summary>
+        <p class="a">指で使う前提で作っています。よく使うボタンは親指が届くチャートの下にまとめ、上段・下段・オシレーターの高さは境目をドラッグして変えられます。線を動かす間は、もう一方の画面に指の下を拡大して映します。うっかり触れて線が動かないよう「固定」もできます。じっくり分析するのはPC、スキマ時間に検証を積み上げるのはスマホ、と使い分ける人にも向いています。</p>
       </details>
       <details>
         <summary><span class="q">Q</span><span class="t">無料でどこまで使えますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
@@ -843,10 +844,6 @@
         <summary><span class="q">Q</span><span class="t">他のチャート分析ツールと何が違いますか？</span><span class="plus" aria-hidden="true">＋</span></summary>
         <p class="a">一般的なチャート分析ツールは、リアルタイムの相場分析が得意です。本アプリは、先の値動きを隠して1本ずつ検証し、エントリーの理由・損切りの理由・結果を記録して振り返ることに特化しています。</p>
       </details>
-      <details data-mode="beta">
-        <summary><span class="q">Q</span><span class="t">テスト版は、どのくらいの完成度ですか？</span><span class="plus" aria-hidden="true">＋</span></summary>
-        <p class="a">検証・記録・集計の機能はひととおり使えます。テスト中のため、不具合や表示・仕様の変更が起きることがあります。</p>
-      </details>
     </div>
   </div>
 </section>
@@ -856,12 +853,8 @@
   <div class="container" data-reveal>
     <h2>スキマ時間の数分から、<br>検証を積み上げる。</h2>
     <p class="section-lead">1回の勝ち負けではなく、記録を重ねて自分の傾向を見る。そのための道具です。</p>
-    <div data-mode="beta">
-      <a class="btn-primary" href="#signup">無料でテストに参加する</a>
-      <p class="note">登録いただくのはメールアドレスのみです。</p>
-    </div>
-    <div data-mode="launch">
-      <a class="btn-primary js-play-link" href="#signup">Google Playで入手（無料）</a>
+    <div>
+      <a class="btn-primary" href="https://play.google.com/store/apps/details?id=com.fxkensho.fx_kensho&amp;utm_source=lp&amp;utm_medium=web" target="_blank" rel="noopener">Google Playで入手（無料）</a>
       <p class="note">Android対応・ダウンロード無料</p>
     </div>
   </div>
@@ -883,9 +876,14 @@
         <a href="#features">特長</a>
         <a href="#screens">画面</a>
         <a href="#pricing">料金</a>
-        <a href="#signup" data-mode="beta">参加方法</a>
-        <a href="#signup" data-mode="launch">はじめ方</a>
+        <a href="#signup">はじめ方</a>
         <a href="#faq">FAQ</a>
+      </nav>
+      <nav class="footer-nav" aria-label="読みもの">
+        <span class="label">Guides</span>
+        <a href="guide/android-fx-backtest.html">Androidで過去検証するやり方</a>
+        <a href="guide/mt4-csv-export.html">MT4・MT5からCSVを書き出す手順</a>
+        <a href="https://note.com/snowcandlestudio/n/n3e2e614fcbc7" target="_blank" rel="noopener">note：検証を続けるためのコツ ↗</a>
       </nav>
       <nav class="footer-nav legal" aria-label="規約リンク">
         <span class="label">Legal</span>
@@ -904,107 +902,6 @@
 
 <script>
 (function(){
-  /* ===== 正式版表示：Google Playへのリンクを差し込む（PLAY_STORE_URL は <head> 冒頭で設定） ===== */
-  if (typeof PLAY_STORE_URL === 'string' && PLAY_STORE_URL) {
-    Array.prototype.forEach.call(document.querySelectorAll('.js-play-link'), function(a){
-      a.href = PLAY_STORE_URL;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-    });
-  }
-
-  /* ★★★ β応募フォームの送信先 ★★★
-     1. SIGNUP_ACTION_URL … Googleフォームの投稿先URL（".../formResponse" で終わる。viewformではない）
-     2. SIGNUP_EMAIL_FIELD … そのフォームの「メールアドレス」質問に対応する entry.XXXXXXXXX
-     ⚠️ fetchはCORS制限回避のため mode:'no-cors' を使うので、送信の成功/失敗をJS側から検知できません。
-        空欄だと応募ボタンは「準備中」表示になります（設定し忘れによる取りこぼし防止）。
-        値を変えたら必ず自分のメールアドレスで1回実際に送信し、回答シートに届くことを目視確認してください。 */
-  var SIGNUP_ACTION_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdPv9rgTmq5AP041KJDg-TtkQPkqDD3IRzgRHWl1HJqst8dQw/formResponse";
-  var SIGNUP_EMAIL_FIELD = "entry.1628383669";
-
-  var form = document.getElementById('signupForm');
-  var sentBox = document.getElementById('signupSent');
-  var submitBtn = document.getElementById('signupSubmitBtn');
-  var sentEmailEl = document.getElementById('signupSentEmail');
-  var sentAtEl = document.getElementById('signupSentAt');
-  var resetLink = document.getElementById('signupResetLink');
-
-  /* 入力ミス対策：申込済みのメールアドレス/日時を localStorage に保存し、
-     次回訪問時も同じ「登録済み」画面を表示する（静的サイトのためサーバー側の記録を持てない）。 */
-  var STORAGE_KEY = 'fxkensho_beta_signup';
-
-  function fmtDateTime(iso){
-    try {
-      return new Date(iso).toLocaleString('ja-JP', {
-        year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
-      });
-    } catch (err) { return ''; }
-  }
-
-  function showSent(email, at){
-    sentEmailEl.textContent = email;
-    sentAtEl.textContent = fmtDateTime(at);
-    form.hidden = true;
-    sentBox.hidden = false;
-  }
-
-  function saveSignup(email){
-    var record = { email: email, at: new Date().toISOString() };
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(record)); } catch (err) {}
-    return record;
-  }
-
-  function loadSignup(){
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch (err) { return null; }
-  }
-
-  var existing = loadSignup();
-  if (existing && existing.email) {
-    showSent(existing.email, existing.at);
-  }
-
-  resetLink.addEventListener('click', function(e){
-    e.preventDefault();
-    /* ここでは localStorage を消さない：新しいメールで送信するまでは前回の登録を保持する。 */
-    sentBox.hidden = true;
-    form.hidden = false;
-    document.getElementById('beta-email').focus();
-  });
-
-  if (!SIGNUP_ACTION_URL || !SIGNUP_EMAIL_FIELD) {
-    submitBtn.textContent = '応募フォームは準備中です（近日公開）';
-    submitBtn.disabled = true;
-    submitBtn.className = 'btn-disabled';
-  } else {
-    form.addEventListener('submit', function(e){
-      e.preventDefault();
-      var email = document.getElementById('beta-email').value.trim();
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
-
-      /* 同一ブラウザでの重複送信対策：直前に登録済みの同じアドレスなら再送信しない。 */
-      if (existing && existing.email && existing.email.toLowerCase() === email.toLowerCase()) {
-        showSent(existing.email, existing.at);
-        return;
-      }
-
-      var body = new URLSearchParams();
-      body.set(SIGNUP_EMAIL_FIELD, email);
-      try {
-        fetch(SIGNUP_ACTION_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: body.toString()
-        }).catch(function(){});
-      } catch (err) {}
-      existing = saveSignup(email);
-      showSent(existing.email, existing.at);
-    });
-  }
-
   /* ===== ナビ：スクロールで背景を濃くする ===== */
   var nav = document.getElementById('siteNav');
   var onScroll = function(){

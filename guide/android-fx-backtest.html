@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+  記事ページ：AndroidスマホでFXの過去検証（バックテスト）をするやり方（2026-11-15 SEO）
+  狙う検索語：「スマホ FX 過去検証」「FX検証 Android」「android fx 過去 検証」「FX リプレイ スマホ」。
+  note記事01（手順とコツ）と中身を重ねない：こちらは「スマホの画面での進め方・PCとの使い分け」が中心。
+  不変制約：投資助言NG（勝てる/稼げる/儲かる/将来予測なし）・特定手法の中身を書かない・競合名を名指ししない。
+-->
+<title>AndroidスマホでFXの過去検証（バックテスト）をするやり方 | スマホでFX検証</title>
+<meta name="description" content="AndroidスマホだけでFXの過去検証（バックテスト・リプレイ練習）を進めるやり方。用意するもの、未来を隠して1本ずつ進める手順、記録と振り返り、スマホの小さい画面で検証を続ける工夫、PCとの使い分けをまとめました。">
+<meta name="theme-color" content="#0E1116">
+<link rel="canonical" href="https://snowcandlestudio.github.io/guide/android-fx-backtest.html">
+<link rel="icon" type="image/png" href="../img/icon512.png">
+<meta property="og:site_name" content="スマホでFX検証">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AndroidスマホでFXの過去検証（バックテスト）をするやり方">
+<meta property="og:description" content="未来を隠して1本ずつ進め、理由と結果を記録する。スマホで検証を続けるための進め方。">
+<meta property="og:url" content="https://snowcandlestudio.github.io/guide/android-fx-backtest.html">
+<meta property="og:image" content="https://snowcandlestudio.github.io/img/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="guide.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "AndroidスマホでFXの過去検証（バックテスト）をするやり方",
+      "description": "AndroidスマホだけでFXの過去検証（バックテスト・リプレイ練習）を進めるやり方と、スマホの画面で検証を続ける工夫。",
+      "inLanguage": "ja",
+      "datePublished": "2026-11-15",
+      "dateModified": "2026-11-15",
+      "author": { "@type": "Organization", "name": "SnowCandleStudio", "url": "https://snowcandlestudio.github.io/" },
+      "publisher": { "@type": "Organization", "name": "SnowCandleStudio", "logo": { "@type": "ImageObject", "url": "https://snowcandlestudio.github.io/img/icon512.png" } },
+      "image": "https://snowcandlestudio.github.io/img/01_chart_tpsl.png",
+      "mainEntityOfPage": "https://snowcandlestudio.github.io/guide/android-fx-backtest.html"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "スマホでFX検証", "item": "https://snowcandlestudio.github.io/" },
+        { "@type": "ListItem", "position": 2, "name": "AndroidスマホでFXの過去検証をするやり方", "item": "https://snowcandlestudio.github.io/guide/android-fx-backtest.html" }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="g-nav">
+  <div class="g-nav-inner">
+    <a class="g-brand" href="../"><img src="../img/icon512.png" alt="" width="28" height="28">スマホでFX検証</a>
+    <a class="g-cta" href="https://play.google.com/store/apps/details?id=com.fxkensho.fx_kensho&amp;utm_source=lp_guide&amp;utm_medium=web" target="_blank" rel="noopener">Google Playで入手</a>
+  </div>
+</header>
+
+<main class="g-main">
+  <p class="g-crumb"><a href="../">スマホでFX検証</a> › 読みもの</p>
+  <h1>AndroidスマホでFXの過去検証（バックテスト）をするやり方</h1>
+  <p class="g-meta">2026年11月15日 ・ SnowCandleStudio（「スマホでFX検証」の開発者）</p>
+
+  <p class="g-lead">FXの過去検証は、PCの検証ソフトでじっくりやるもの、と思われがちです。けれど、机に向かう時間が取れずに止まってしまう人も多いはず。この記事では、<b>Androidスマホだけで過去検証（バックテスト・リプレイ練習）を進めるやり方</b>と、小さい画面でも検証を続けるための工夫をまとめます。</p>
+  <p>手順の説明には、筆者が個人で開発しているAndroidアプリ「スマホでFX検証」を使います。考え方そのものは、ほかの検証方法でも同じです。</p>
+
+  <nav class="g-toc" aria-label="目次">
+    <p>目次</p>
+    <ol>
+      <li><a href="#what">スマホでやる過去検証とは</a></li>
+      <li><a href="#prepare">用意するもの</a></li>
+      <li><a href="#steps">進め方（5ステップ）</a></li>
+      <li><a href="#screen">小さい画面で続けるための工夫</a></li>
+      <li><a href="#pc">PCとの使い分け</a></li>
+      <li><a href="#caution">注意してほしいこと</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="what">1. スマホでやる過去検証とは</h2>
+  <p>過去検証には、ルールをプログラムにして一気に計算させる「自動の検証」と、チャートを1本ずつ進めながら自分で判断する「手動の検証」があります。スマホに向いているのは<b>手動の検証</b>です。チャートを過去に戻し、先が見えない状態でローソク足を1本ずつ進めながら売買を重ねます（リプレイ練習とも呼ばれます）。</p>
+  <p>手動の検証は1回あたりの手間が小さいので、通勤中や休憩中の数分でも少しずつ進められます。「まとまった時間が取れないから検証できない」という悩みには、スマホのほうが合っていることがあります。</p>
+
+  <h2 id="prepare">2. 用意するもの</h2>
+  <ul>
+    <li><b>Androidスマホ</b>と、過去検証アプリ「スマホでFX検証」（ダウンロード無料）。</li>
+    <li><b>検証するルール</b>：どこで入り、どこで損切り・利確するか、どんな時は見送るか。最初から完璧でなくてかまいません。</li>
+    <li><b>ローソク足のデータ（CSV）</b>：最初はアプリに入っている練習用のデモデータ（合成データ）で十分です。自分の相場で検証したくなったら、MT4・MT5から書き出したCSVを取り込みます（手順は<a href="mt4-csv-export.html">MT4・MT5からCSVを書き出してスマホに取り込む手順</a>）。</li>
+  </ul>
+
+  <h2 id="steps">3. 進め方（5ステップ）</h2>
+
+  <h3>① 上位足と下位足を並べる</h3>
+  <p>チャートは上段と下段の2画面です。たとえば上段に1時間足、下段に5分足を出して、上位足で流れを見ながら下位足でタイミングを取る、といったマルチタイムフレーム（MTF）の見方ができます。2つの画面は、右端の時刻がそろったまま動きます。</p>
+  <figure class="g-fig">
+    <img src="../img/01_chart_tpsl.png" alt="上段に上位足、下段に下位足を並べたチャート画面。TP/SLラインと含み損益を表示" width="1080" height="2160" loading="lazy">
+    <figcaption>上位足と下位足の2画面（保有中のTP/SLライン）</figcaption>
+  </figure>
+
+  <h3>② 先を見ずに、1本ずつ進める</h3>
+  <p>検証でいちばん大事なのは、答え（先の値動き）を見ないことです。アプリでは、今の位置より先のローソク足とインジケーターは表示されません。1本送り・自動再生・逆再生で、判断の瞬間を再現します。描いたラインに価格が届いたら再生を自動で止めることもできます。</p>
+
+  <h3>③ 注文の前に、理由を記録する</h3>
+  <p>入ると決めたら、注文の前に理由を残します。あとから書くと、結果を知ったうえで理由を作ってしまいがちだからです。アプリでは、自分で作ったチェック項目に答えてから発注します。あとから書き換えた理由は、エントリー時の理由と分けて表示されます。チェック項目やパターン名はすべて自分で作る仕組みなので、学んだ手法の言葉をそのまま使えます。</p>
+  <p>注文は成行・指値・逆指値に対応し、利確（TP）・損切り（SL）はラインをドラッグして置きます。スプレッドと手数料を銘柄ごとに設定すると、約定価格に反映されます。</p>
+
+  <h3>④ 決済したら、答え合わせをする</h3>
+  <p>決済したトレードを一覧から選ぶと、エントリーから決済までを1画面で見返せます。迷った場面は「注文時までやり直す」で注文の直前に戻り、同じ場面をもう一度試せます。損切りの理由や自己評価（ルールを守れたか）も、ここで残しておきます。</p>
+
+  <h3>⑤ たまったら、数字で振り返る</h3>
+  <p>勝率・プロフィットファクター・1回あたりの平均pips・平均リスクリワード・最大ドローダウンなどを、パターン別・損切りの理由別に集計します。件数が少ないうちの数字はあてにならないため、アプリでは件数が少ない間は「参考」「暫定」と表示し、数字を断定しません。まずは30件、できれば100件を目安に積み上げてみてください。</p>
+
+  <h2 id="screen">4. 小さい画面で続けるための工夫</h2>
+  <p>「スマホの画面は狭くて検証しにくい」という声はよく聞きます。アプリでは、次のような形で指での操作を補っています。</p>
+  <ul>
+    <li><b>ボタンは親指が届く位置に</b>：再生や描画のボタンはチャートのすぐ下にまとめています。</li>
+    <li><b>画面の高さを変えられる</b>：上段・下段・オシレーターの境目をドラッグして、見やすい比率にできます。</li>
+    <li><b>指先まわりを拡大表示</b>：線を動かしている間は、もう一方の画面に指の下のチャートを大きく映します。</li>
+    <li><b>線の「固定」</b>：スクロールや拡大の最中に、引いた線をうっかり動かしてしまうのを防げます。</li>
+    <li><b>1回を短く</b>：1日5件でも、毎日続けば1か月で100件を超えます。スマホの利点は、スキマ時間に少しずつ進められることです。</li>
+  </ul>
+
+  <h2 id="pc">5. PCとの使い分け</h2>
+  <p>スマホとPCは、どちらかを選ぶものではありません。たとえば次のように使い分けられます。</p>
+  <ul>
+    <li><b>PC</b>：CSVの書き出し、何枚ものチャートを並べた細かい分析、ルールの見直し。</li>
+    <li><b>スマホ</b>：決めたルールでの検証を、スキマ時間に1件ずつ積み上げる。理由と結果の記録。</li>
+  </ul>
+  <p>CSVを書き出すときだけPCを使えば、取り込んだ後の検証・記録・集計はスマホで完結します。記録はスマホの中に保存され、インストール後はオフラインでも使えます。</p>
+
+  <h2 id="caution">6. 注意してほしいこと</h2>
+  <p>過去検証の結果は、あくまで過去のデータでの結果です。同じ結果が将来も出るとは限りません。検証は「自分のルールと自分の判断を知るための作業」として使い、実際のトレードの判断はご自身の責任で行ってください。</p>
+  <p>検証を始める前に決めておくこと（ルール・範囲・記録する項目）や、続けるためのコツは、noteの記事<a href="https://note.com/snowcandlestudio/n/n3e2e614fcbc7" target="_blank" rel="noopener">「スマホでFXの過去検証をする手順と、続けるためのコツ」</a>にくわしく書いています。</p>
+
+  <div class="g-warn">本アプリは、過去チャートを用いたFXトレードの学習・検証・記録を目的としたツールです。投資助言、売買推奨、将来の利益を保証するものではありません。画面内の数値はサンプルデータによる表示例です。MetaTrader、MT4、MT5は各権利者の商標または登録商標です。</div>
+
+  <div class="g-box">
+    <p class="t">スマホでFX検証（Android）</p>
+    <p class="s">ダウンロード無料・トレード記録20件まで無料・デモデータですぐ試せます</p>
+    <a class="btn" href="https://play.google.com/store/apps/details?id=com.fxkensho.fx_kensho&amp;utm_source=lp_guide&amp;utm_medium=web" target="_blank" rel="noopener">Google Playで入手（無料）</a>
+  </div>
+
+  <div class="g-related">
+    <p>関連する読みもの</p>
+    <ul>
+      <li><a href="mt4-csv-export.html">MT4・MT5からCSVを書き出してスマホに取り込む手順</a></li>
+      <li><a href="https://note.com/snowcandlestudio/n/n3e2e614fcbc7" target="_blank" rel="noopener">note：スマホでFXの過去検証をする手順と、続けるためのコツ</a></li>
+    </ul>
+  </div>
+</main>
+
+<footer class="g-foot">
+  <div class="g-foot-inner">
+    <nav aria-label="サイト内リンク">
+      <a href="../">トップ</a>
+      <a href="android-fx-backtest.html">過去検証のやり方</a>
+      <a href="mt4-csv-export.html">CSVの書き出し手順</a>
+      <a href="../terms_of_use.html">利用規約</a>
+      <a href="../privacy_policy.html">プライバシーポリシー</a>
+      <a href="../commercial_transactions.html">特定商取引法に基づく表記</a>
+    </nav>
+    <p>© 2026 SnowCandleStudio</p>
+  </div>
+</footer>
+
+</body>
+</html>
